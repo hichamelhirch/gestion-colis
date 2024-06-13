@@ -1,0 +1,56 @@
+.container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
+
+mat-form-field {
+  width: 100%;
+}
+
+button {
+  margin-top: 20px;
+}
+
+.form-container {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px; /* Adjust gap between columns as needed */
+}
+
+.form-column {
+  flex: 1;
+}
+
+.mat-form-field {
+  width: 100%;
+}
+
+.button-group {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px; /* Adjust gap between buttons as needed */
+  margin-top: 20px;
+}
+
+.form-container {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px; /* Adjust gap between columns as needed */
+}
+
+.form-column {
+  flex: 1;
+}
+
+.mat-form-field {
+  width: 100%;
+}
+
+.button-group {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px; /* Adjust gap between buttons as needed */
+  margin-top: 20px;
+}

@@ -1,0 +1,200 @@
+<div>
+  <mat-card>
+    <mat-toolbar>Créer un Colis</mat-toolbar>
+
+    <mat-card-content>
+      <form [formGroup]="colisForm" (ngSubmit)="onSubmit()">
+        <!-- Première étape -->
+        <div *ngIf="currentStep === 1">
+          <mat-form-field appearance="fill">
+            <mat-label>Type de Livraison</mat-label>
+            <mat-select formControlName="typeLivraison" required>
+              <mat-option *ngFor="let type of typeLivraisonOptions" [value]="type">{{ type }}</mat-option>
+            </mat-select>
+            <mat-error *ngIf="colisForm.controls['typeLivraison'].hasError('required')">
+              Ce champ est obligatoire
+            </mat-error>
+          </mat-form-field>
+        </div>
+
+        <!-- Deuxième étape -->
+        <div *ngIf="currentStep === 2">
+          <mat-card-title>Adresse Livraison</mat-card-title>
+          <mat-form-field appearance="fill">
+            <mat-label>Nom et prenom</mat-label>
+            <input matInput formControlName="nomDestinataire" required>
+            <mat-error *ngIf="colisForm.controls['nomDestinataire'].hasError('required')">
+              Ce champ est obligatoire
+            </mat-error>
+          </mat-form-field>
+          <mat-form-field appearance="fill">
+            <mat-label>Téléphone </mat-label>
+            <input matInput formControlName="telDestinataire" required>
+            <mat-error *ngIf="colisForm.controls['telDestinataire'].hasError('required')">
+              Ce champ est obligatoire
+            </mat-error>
+          </mat-form-field>
+          <mat-form-field appearance="fill">
+            <mat-label>Adresse</mat-label>
+            <input matInput formControlName="adresseDestinataire" required>
+            <mat-error *ngIf="colisForm.controls['adresseDestinataire'].hasError('required')">
+              Ce champ est obligatoire
+            </mat-error>
+          </mat-form-field>
+          <mat-form-field appearance="fill">
+            <mat-label>Adresse 2</mat-label>
+            <input matInput formControlName="adresse2Destinataire">
+          </mat-form-field>
+          <mat-form-field appearance="fill">
+            <mat-label>Ville </mat-label>
+            <input type="text" matInput formControlName="villeDestinataire" [matAutocomplete]="autoDestinataire" required>
+            <mat-autocomplete #autoDestinataire="matAutocomplete" [displayWith]="displayVille">
+              <mat-option *ngFor="let ville of filteredVillesClientDestinataire | async" [value]="ville">
+                {{ ville.ville }}
+              </mat-option>
+            </mat-autocomplete>
+            <mat-error *ngIf="colisForm.controls['villeDestinataire'].hasError('required')">
+              Ce champ est obligatoire
+            </mat-error>
+          </mat-form-field>
+
+          <mat-card-title>Adresse d'enlèvement</mat-card-title>
+
+          <mat-form-field appearance="fill">
+            <mat-label>Téléphone </mat-label>
+            <input matInput formControlName="numTelChargeur" required>
+            <mat-error *ngIf="colisForm.controls['numTelChargeur'].hasError('required')">
+              Ce champ est obligatoire
+            </mat-error>
+          </mat-form-field>
+          <mat-form-field appearance="fill">
+            <mat-label> Adresse </mat-label>
+            <input matInput formControlName="premiereAdresseChargeur" required>
+            <mat-error *ngIf="colisForm.controls['premiereAdresseChargeur'].hasError('required')">
+              Ce champ est obligatoire
+            </mat-error>
+          </mat-form-field>
+          <mat-form-field appearance="fill">
+            <mat-label> Adresse 2</mat-label>
+            <input matInput formControlName="deuxiemeAdresseChargeur" required>
+            <mat-error *ngIf="colisForm.controls['deuxiemeAdresseChargeur'].hasError('required')">
+              Ce champ est obligatoire
+            </mat-error>
+          </mat-form-field>
+
+          <mat-form-field appearance="fill">
+            <mat-label>Ville </mat-label>
+            <input type="text" matInput formControlName="villeDepart" [matAutocomplete]="autoDepart" required>
+            <mat-autocomplete #autoDepart="matAutocomplete" [displayWith]="displayVille">
+              <mat-option *ngFor="let ville of filteredVillesClientDepart | async" [value]="ville">
+                {{ ville.ville }}
+              </mat-option>
+            </mat-autocomplete>
+            <mat-error *ngIf="colisForm.controls['villeDepart'].hasError('required')">
+              Ce champ est obligatoire
+            </mat-error>
+          </mat-form-field>
+        </div>
+
+        <!-- Troisième étape -->
+        <div *ngIf="currentStep === 3" class="form-container">
+          <div class="form-column">
+            <mat-card-title>Facturation</mat-card-title>
+            <mat-form-field appearance="fill">
+              <mat-label>Frais</mat-label>
+              <input matInput [formControl]="fraisControl" type="number" [disabled]="true">
+            </mat-form-field>
+            <mat-form-field appearance="fill">
+              <mat-label>Cash à la livraison</mat-label>
+              <input matInput formControlName="cashDelivery" type="number" required>
+              <span matSuffix>DH</span>
+              <mat-error *ngIf="colisForm.controls['cashDelivery'].hasError('required')">
+                Ce champ est obligatoire
+              </mat-error>
+            </mat-form-field>
+            <mat-form-field appearance="fill">
+              <mat-label>Valeur</mat-label>
+              <input matInput formControlName="valeurColis" type="number">
+              <span matSuffix>DH</span>
+            </mat-form-field>
+          </div>
+
+          <div class="form-column">
+            <mat-card-title>Dimensions</mat-card-title>
+            <mat-form-field appearance="fill">
+              <mat-label>Poids (kg)</mat-label>
+              <input matInput formControlName="poids" type="number" required>
+              <mat-error *ngIf="colisForm.controls['poids'].hasError('required')">
+                Ce champ est obligatoire
+              </mat-error>
+            </mat-form-field>
+            <mat-form-field appearance="fill">
+              <mat-label>Longueur (cm)</mat-label>
+              <input matInput formControlName="longueur" type="number" required>
+              <mat-error *ngIf="colisForm.controls['longueur'].hasError('required')">
+                Ce champ est obligatoire
+              </mat-error>
+            </mat-form-field>
+            <mat-form-field appearance="fill">
+              <mat-label>Largeur (cm)</mat-label>
+              <input matInput formControlName="largeur" type="number" required>
+              <mat-error *ngIf="colisForm.controls['largeur'].hasError('required')">
+                Ce champ est obligatoire
+              </mat-error>
+            </mat-form-field>
+            <mat-form-field appearance="fill">
+              <mat-label>Hauteur (cm)</mat-label>
+              <input matInput formControlName="hauteur" type="number" required>
+              <mat-error *ngIf="colisForm.controls['hauteur'].hasError('required')">
+                Ce champ est obligatoire
+              </mat-error>
+            </mat-form-field>
+          </div>
+        </div>
+
+        <!-- Services à la Livraison déplacé en bas -->
+        <div *ngIf="currentStep === 3" class="form-container">
+          <div class="form-column">
+            <mat-card-title>Services à la Livraison</mat-card-title>
+            <table mat-table [dataSource]="services" class="mat-elevation-z8">
+              <ng-container matColumnDef="select">
+                <th mat-header-cell *matHeaderCellDef></th>
+                <td mat-cell *matCellDef="let service">
+                  <mat-checkbox (change)="onServiceSelect(service, $event.checked)"></mat-checkbox>
+                </td>
+              </ng-container>
+              <ng-container matColumnDef="serviceName">
+                <th mat-header-cell *matHeaderCellDef> Service </th>
+                <td mat-cell *matCellDef="let service"> {{service.serviceName}} </td>
+              </ng-container>
+              <ng-container matColumnDef="description">
+                <th mat-header-cell *matHeaderCellDef> Description </th>
+                <td mat-cell *matCellDef="let service"> {{service.description}} </td>
+              </ng-container>
+              <ng-container matColumnDef="price">
+                <th mat-header-cell *matHeaderCellDef> Prix </th>
+                <td mat-cell *matCellDef="let service"> {{service.price}} </td>
+              </ng-container>
+              <ng-container matColumnDef="status">
+                <th mat-header-cell *matHeaderCellDef> Statut </th>
+                <td mat-cell *matCellDef="let service"> {{service.status}} </td>
+              </ng-container>
+              <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+              <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+            </table>
+            <mat-form-field appearance="fill">
+              <mat-label>Informations</mat-label>
+              <input matInput formControlName="description">
+            </mat-form-field>
+          </div>
+        </div>
+
+        <div class="button-group">
+          <button mat-raised-button color="primary" type="button" (click)="previousStep()" *ngIf="currentStep > 1">Précédent</button>
+          <button mat-raised-button color="primary" type="button" (click)="nextStep()" *ngIf="currentStep < 3">Suivant</button>
+          <button mat-raised-button color="primary" type="submit" *ngIf="currentStep === 3">Créer</button>
+        </div>
+      </form>
+    </mat-card-content>
+  </mat-card>
+</div>

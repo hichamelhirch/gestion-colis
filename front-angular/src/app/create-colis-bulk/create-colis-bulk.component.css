@@ -1,0 +1,88 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 20px;
+}
+
+.card-margin {
+  margin-bottom: 20px;
+  width: 80%;
+}
+
+.center-content {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+}
+
+.error-messages {
+  color: red;
+  margin-top: 20px;
+}
+
+.error-title {
+  font-weight: bold;
+  color: darkred;
+}
+
+.error-message {
+  list-style-type: none;
+  padding: 5px;
+  margin: 5px 0;
+  border-left: 4px solid darkred;
+  background-color: #ffcccc;
+}
+
+.similar-villes {
+  margin-top: 10px;
+}
+
+.similar-villes h4 {
+  margin: 0;
+  color: darkred;
+}
+
+.similar-villes ul {
+  list-style-type: none;
+  padding: 0;
+}
+
+.similar-villes li {
+  padding: 2px 0;
+  background-color: #ffe6e6;
+  margin: 2px 0;
+}
+
+.log-messages {
+  color: blue;
+  margin-top: 20px;
+}
+
+.log-title {
+  font-weight: bold;
+  color: darkblue;
+}
+
+.log-message {
+  list-style-type: none;
+  padding: 5px;
+  margin: 5px 0;
+  border-left: 4px solid darkblue;
+  background-color: #cce5ff;
+}
+
+.colis-summary {
+  margin-top: 20px;
+}
+
+.colis-saved {
+  color: green;
+  font-weight: bold;
+}
+
+.colis-rejected {
+  color: red;
+  font-weight: bold;
+}

@@ -1,0 +1,103 @@
+/* Barre d'outils */
+.toolbar {
+  background-color: #2c3e50; /* Bleu marine foncé pour un look plus professionnel */
+  color: white;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* Espaceur */
+.spacer {
+  flex: 1;
+}
+
+/* Conteneur du tiroir */
+.drawer-container {
+  height: 100vh;
+}
+
+/* Tiroir */
+.drawer {
+  width: 250px;
+  background-color: #ecf0f1; /* Gris clair */
+}
+
+/* Contenu principal */
+.main-content {
+  padding: 20px;
+  min-height: calc(100vh - 64px); /* Ajuster pour la hauteur de la barre d'outils */
+}
+
+/* Barre d'outils collante */
+mat-toolbar {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+}
+
+/* Bouton d'importation */
+.import-button {
+  color: #ecf0f1; /* Gris clair */
+}
+
+/* Bouton de déconnexion */
+.logout-button {
+  background-color: #e74c3c; /* Rouge foncé */
+  color: white;
+  margin-left: 10px;
+}
+
+/* Barre de recherche */
+.search-bar {
+  margin-left: 10px;
+  max-width: 300px; /* Optionnel : Limiter la largeur de la barre de recherche */
+}
+
+/* Styles des boutons actifs */
+button.mat-button.active,
+button.mat-icon-button.active,
+button.mat-raised-button.active {
+  background-color: #2c3e50; /* Bleu marine foncé */
+  color: white;
+}
+
+/* Champ de formulaire */
+mat-form-field {
+  color: white;
+}
+
+/* Placeholder et étiquette */
+mat-form-field .mat-form-field-label {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+mat-form-field .mat-placeholder {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+mat-form-field .mat-input-element {
+  color: white;
+}
+
+/* Soulignement de l'entrée */
+.mat-form-field-underline {
+  background-color: white;
+}
+
+.mat-form-field-ripple {
+  background-color: white;
+}
+
+/* Bouton d'icône */
+button.mat-icon-button {
+  color: white;
+}
+
+mat-form-field input {
+  font-size: 14px;
+}
+.error-message {
+  color: red;
+  font-weight: bold;
+}

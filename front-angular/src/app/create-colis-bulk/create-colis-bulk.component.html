@@ -1,0 +1,47 @@
+<div class="container">
+  <mat-card *ngIf="showForm" class="card-margin">
+    <mat-toolbar color="primary">Télécharger le Modèle de Colis</mat-toolbar>
+    <mat-card-content class="center-content">
+      <button mat-raised-button color="accent" (click)="downloadTemplate()">
+        <mat-icon>download</mat-icon> Télécharger le modèle CSV
+      </button>
+    </mat-card-content>
+  </mat-card>
+
+  <mat-card class="card-margin">
+    <mat-toolbar color="primary">Importer des Colis en Masse</mat-toolbar>
+    <mat-card-content>
+      <form *ngIf="showForm" (ngSubmit)="onSubmit()" class="center-content">
+        <input type="file" (change)="onFileSelected($event)" accept=".csv, .xlsx" />
+        <button mat-raised-button color="primary" type="submit">Importer et Créer</button>
+      </form>
+      <div *ngIf="errorMessages.length > 0" class="error-messages">
+        <h3 class="error-title">Messages d'erreur :</h3>
+        <ul>
+          <li *ngFor="let message of errorMessages" class="error-message">
+            {{ message }}
+            <div *ngIf="getSimilarVillesForMessage(message).length > 0" class="similar-villes">
+              <h4>Villes similaires :</h4>
+              <ul>
+                <li *ngFor="let ville of getSimilarVillesForMessage(message)">{{ ville.nom }}</li>
+              </ul>
+            </div>
+          </li>
+        </ul>
+      </div>
+      <div *ngIf="logMessages.length > 0" class="log-messages">
+        <ul>
+          <li *ngFor="let message of logMessages" class="log-message">{{ message }}</li>
+        </ul>
+      </div>
+      <div *ngIf="colisSaved > 0 || colisRejected > 0" class="colis-summary">
+        <p *ngIf="colisSaved > 0" class="colis-saved">Nombre de colis sauvegardés : <strong>{{ colisSaved }}</strong></p>
+        <p *ngIf="colisRejected > 0" class="colis-rejected">Nombre de colis rejetés : <strong>{{ colisRejected }}</strong></p>
+      </div>
+      <div class="center-content" *ngIf="!showForm">
+        <button mat-raised-button color="accent" (click)="resetForm()">Importer de Nouveaux Colis</button>
+      </div>
+    </mat-card-content>
+  </mat-card>
+</div>
+

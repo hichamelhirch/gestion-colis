@@ -1,0 +1,26 @@
+<h1 mat-dialog-title>Recherche de Colis</h1>
+<div mat-dialog-content>
+  <div *ngIf="data.errorMessage; else resultTemplate">
+    <p class="error-message">{{ data.errorMessage }}</p>
+  </div>
+  <ng-template #resultTemplate>
+    <div *ngIf="data.colis">
+      <h2>Colis trouvé</h2>
+      <mat-list>
+        <mat-list-item>
+          <strong>Nom Destinataire:</strong> {{ data.colis.nomDestinataire }}
+        </mat-list-item>
+        <mat-list-item>
+          <strong>Frais:</strong> {{ data.colis.frais }} DH
+        </mat-list-item>
+        <mat-list-item>
+          <strong>Statut:</strong> {{ data.colis.statusColis }}
+        </mat-list-item>
+      </mat-list>
+    </div>
+  </ng-template>
+</div>
+<div mat-dialog-actions align="end">
+  <button mat-button (click)="onClose()">Fermer</button>
+  <button mat-raised-button color="primary" *ngIf="data.colis" (click)="voirDetails()">Voir Détails</button>
+</div>

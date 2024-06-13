@@ -1,0 +1,6 @@
+<div *ngIf="errorMessages.length > 0" class="error-messages">
+  <h3>Messages d'erreur :</h3>
+  <ul>
+    <li *ngFor="let message of errorMessages">{{ message }}</li>
+  </ul>
+</div>

@@ -1,0 +1,131 @@
+<div class="colis-list">
+  <table mat-table [dataSource]="dataSource" matSort class="mat-elevation-z8">
+    <!-- Colonne pour les cases à cocher -->
+    <ng-container matColumnDef="select">
+      <th mat-header-cell *matHeaderCellDef>
+        <mat-checkbox (change)="$event ? masterToggle() : null"
+                      [checked]="selection.hasValue() && isAllSelected()"
+                      [indeterminate]="selection.hasValue() && !isAllSelected()">
+        </mat-checkbox>
+      </th>
+      <td mat-cell *matCellDef="let row">
+        <mat-checkbox (click)="$event.stopPropagation()"
+                      (change)="$event ? toggleSelection(row) : null"
+                      [checked]="selection.isSelected(row)">
+        </mat-checkbox>
+      </td>
+    </ng-container>
+
+    <ng-container matColumnDef="Numero">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header> Numéro </th>
+      <td mat-cell *matCellDef="let colis"> {{colis.numeroColis || 'N/A'}} </td>
+    </ng-container>
+
+    <ng-container matColumnDef="barcode">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header> Barcode </th>
+      <td mat-cell *matCellDef="let colis">
+        <span appCopier="{{colis.codeBarre}}">
+          {{colis.codeBarre | truncate:12}}
+        </span>
+      </td>
+    </ng-container>
+
+    <ng-container matColumnDef="creationDate">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header> Créé le </th>
+      <td mat-cell *matCellDef="let colis"> {{colis.creationDate | date:'dd/MM/yyyy HH:mm'}} </td>
+    </ng-container>
+
+    <ng-container matColumnDef="chargeur">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header> Chargeur </th>
+      <td mat-cell *matCellDef="let colis"> {{colis.premiereAdresseChargeur || 'N/A'}} </td>
+    </ng-container>
+
+    <ng-container matColumnDef="livreA">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header> Livré à </th>
+      <td mat-cell *matCellDef="let colis"> {{colis.nomDestinataire || 'N/A'}} </td>
+    </ng-container>
+
+    <ng-container matColumnDef="de">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header> De </th>
+      <td mat-cell *matCellDef="let colis"> {{colis.villeDepart?.ville || 'N/A'}} </td>
+    </ng-container>
+
+    <ng-container matColumnDef="a">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header> À </th>
+      <td mat-cell *matCellDef="let colis"> {{colis.villeDestinataire?.ville || 'N/A'}} </td>
+    </ng-container>
+
+    <ng-container matColumnDef="type">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header> Type </th>
+      <td mat-cell *matCellDef="let colis"> {{colis.typeLivraison || 'N/A'}} </td>
+    </ng-container>
+
+    <ng-container matColumnDef="frais">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header> Frais </th>
+      <td mat-cell *matCellDef="let colis" class="frais-case"> {{colis.frais || 0}} DH </td>
+    </ng-container>
+
+    <ng-container matColumnDef="crbt">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header> CRBT </th>
+      <td mat-cell *matCellDef="let colis" class="crbt-case"> {{colis.cashDelivery || 0}} DH </td>
+    </ng-container>
+
+    <ng-container matColumnDef="status">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header> Statut </th>
+      <td mat-cell *matCellDef="let colis">
+        <span class="badge" [ngClass]="{
+          'confirmed': colis.statusColis === 'CONFIRMER',
+          'draft': colis.statusColis === 'BROUILLON',
+          'cancelled': colis.statusColis === 'ANNULER'
+        }">
+          {{ getStatusLabel(colis.statusColis) }}
+        </span>
+      </td>
+    </ng-container>
+
+    <ng-container matColumnDef="actions">
+      <th mat-header-cell *matHeaderCellDef> Actions </th>
+      <td mat-cell *matCellDef="let colis" class="action-cell">
+        <button mat-icon-button color="primary" class="action-button"
+                [disabled]="colis.statusColis === 'CONFIRMER'|| colis.statusColis === 'ANNULER'"
+                (click)="editColis(colis.id)">
+          <mat-icon>edit</mat-icon>
+        </button>
+        <button mat-icon-button color="accent" class="action-button"
+                [disabled]="colis.statusColis === 'ANNULER'"
+                (click)="downloadLabelAndConfirmStatus(colis)">
+          <mat-icon>download</mat-icon>
+        </button>
+        <button mat-icon-button color="warn" class="action-button"
+                [disabled]="colis.statusColis === 'CONFIRMER'|| colis.statusColis === 'ANNULER'"
+                (click)="updateStatusToConfirmed(colis.id)">
+          <mat-icon>check_circle</mat-icon>
+        </button>
+        <button mat-icon-button color="warn" class="action-button"
+                [disabled]="colis.statusColis === 'CONFIRMER' || colis.statusColis === 'ANNULER'"
+                (click)="updateStatusToCancel(colis.id)">
+          <mat-icon>cancel</mat-icon>
+        </button>
+      </td>
+    </ng-container>
+
+    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+    <tr mat-row *matRowDef="let row; columns: displayedColumns;"
+        (click)="toggleSelection(row)"
+        [class.selected]="selection.isSelected(row)">
+    </tr>
+  </table>
+
+  <mat-paginator [pageSizeOptions]="[5, 10, 20]" showFirstLastButtons (page)="onPageChange()"></mat-paginator>
+
+  <div class="totals">
+    <div class="total-box">Total Frais: {{totalFrais}} DH</div>
+    <div class="total-box">Total CRBT: {{totalCashDelivery}} DH</div>
+  </div>
+
+  <!-- Boutons d'actions groupées -->
+  <div *ngIf="selection.hasValue()" class="batch-actions">
+    <button mat-raised-button color="primary" (click)="batchConfirm()">Confirmer les colis sélectionnés</button>
+    <button mat-raised-button color="accent" (click)="batchDownloadLabel()">Télécharger les étiquettes sélectionnées</button>
+  </div>
+</div>

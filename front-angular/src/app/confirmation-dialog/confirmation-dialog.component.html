@@ -1,0 +1,10 @@
+<h1 mat-dialog-title>
+  <mat-icon>info</mat-icon> Confirmation
+</h1>
+<div mat-dialog-content>
+  <p>Voulez-vous vraiment créer ce colis ?</p>
+</div>
+<div mat-dialog-actions>
+  <button mat-button mat-dialog-close>Annuler</button>
+  <button mat-button color="primary" [mat-dialog-close]="true">Confirmer</button>
+</div>

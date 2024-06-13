@@ -1,0 +1,145 @@
+<div class="edit-colis" fxLayout="column" fxLayoutAlign="center center" fxFlexFill>
+  <mat-card fxFlex="75%" fxFlex.xs="90%">
+    <mat-card-title>Modifier le Colis</mat-card-title>
+    <mat-card-content>
+      <form [formGroup]="editForm" (ngSubmit)="onSubmit()">
+        <div fxLayout="row wrap" fxLayoutGap="16px">
+          <div fxFlex="100%" fxFlex.gt-sm="50%">
+            <mat-form-field appearance="fill">
+              <mat-label>Nom du destinataire</mat-label>
+              <input matInput id="nomDestinataire" formControlName="nomDestinataire" />
+            </mat-form-field>
+          </div>
+          <div fxFlex="100%" fxFlex.gt-sm="50%">
+            <mat-form-field appearance="fill">
+              <mat-label>Adresse du destinataire</mat-label>
+              <input matInput id="adresseDestinataire" formControlName="adresseDestinataire" />
+            </mat-form-field>
+          </div>
+          <div fxFlex="100%" fxFlex.gt-sm="50%">
+            <mat-form-field appearance="fill">
+              <mat-label>Téléphone du destinataire</mat-label>
+              <input matInput id="telDestinataire" formControlName="telDestinataire" />
+            </mat-form-field>
+          </div>
+          <div fxFlex="100%" fxFlex.gt-sm="50%">
+            <mat-form-field appearance="fill">
+              <mat-label>Ville de destination</mat-label>
+              <input type="text" matInput formControlName="villeDestinataire" [matAutocomplete]="auto">
+              <mat-autocomplete #auto="matAutocomplete" [displayWith]="displayVille">
+                <mat-option *ngFor="let ville of filteredVillesDestinataire | async" [value]="ville">
+                  {{ ville.ville }}
+                </mat-option>
+              </mat-autocomplete>
+            </mat-form-field>
+          </div>
+          <div fxFlex="100%" fxFlex.gt-sm="50%">
+            <mat-form-field appearance="fill">
+              <mat-label>Ville de départ</mat-label>
+              <input type="text" matInput formControlName="villeDepart" [matAutocomplete]="autoDepart">
+              <mat-autocomplete #autoDepart="matAutocomplete" [displayWith]="displayVille">
+                <mat-option *ngFor="let ville of filteredVillesDepart | async" [value]="ville">
+                  {{ ville.ville }}
+                </mat-option>
+              </mat-autocomplete>
+            </mat-form-field>
+          </div>
+          <div fxFlex="100%" fxFlex.gt-sm="50%">
+            <mat-form-field appearance="fill">
+              <mat-label>Type de livraison</mat-label>
+              <mat-select formControlName="typeLivraison">
+                <mat-option value="LPR">LPR</mat-option>
+                <mat-option value="LAD">LAD</mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+          <div fxFlex="100%" fxFlex.gt-sm="50%">
+            <mat-form-field appearance="fill">
+              <mat-label>CRBT</mat-label>
+              <input matInput id="cashDelivery" formControlName="cashDelivery" />
+            </mat-form-field>
+          </div>
+          <div fxFlex="100%" fxFlex.gt-sm="50%">
+            <mat-form-field appearance="fill">
+              <mat-label>Valeur du colis</mat-label>
+              <input matInput id="valeurColis" formControlName="valeurColis" />
+            </mat-form-field>
+          </div>
+          <div fxFlex="100%" fxFlex.gt-sm="50%">
+            <mat-form-field appearance="fill">
+              <mat-label>Poids</mat-label>
+              <input matInput id="poids" formControlName="poids" />
+            </mat-form-field>
+          </div>
+          <div fxFlex="100%" fxFlex.gt-sm="50%">
+            <mat-form-field appearance="fill">
+              <mat-label>Longueur</mat-label>
+              <input matInput id="longueur" formControlName="longueur" />
+            </mat-form-field>
+          </div>
+          <div fxFlex="100%" fxFlex.gt-sm="50%">
+            <mat-form-field appearance="fill">
+              <mat-label>Largeur</mat-label>
+              <input matInput id="largeur" formControlName="largeur" />
+            </mat-form-field>
+          </div>
+          <div fxFlex="100%" fxFlex.gt-sm="50%">
+            <mat-form-field appearance="fill">
+              <mat-label>Hauteur</mat-label>
+                <input matInput id="hauteur" formControlName="hauteur" />
+            </mat-form-field>
+          </div>
+          <div fxFlex="100%">
+            <mat-form-field appearance="fill">
+              <mat-label>Description</mat-label>
+              <input matInput id="description" formControlName="description" />
+            </mat-form-field>
+          </div>
+
+          <!-- Gestion des services -->
+          <div fxFlex="100%">
+            <mat-card-title>Services à la Livraison</mat-card-title>
+            <button mat-button type="button" (click)="addService()">Ajouter un service</button>
+
+            <table mat-table [dataSource]="servicesFormArray.controls" class="mat-elevation-z8">
+              <ng-container matColumnDef="serviceName">
+                <th mat-header-cell *matHeaderCellDef> Service </th>
+                <td mat-cell *matCellDef="let service; let i = index">
+                  <mat-form-field appearance="fill">
+                    <mat-label>Service</mat-label>
+                    <mat-select (selectionChange)="updateServiceDetails(i, $event.value)" [formControlName]="i + '.serviceName'">
+                      <mat-option *ngFor="let s of services" [value]="s.id">{{ s.serviceName }}</mat-option>
+                    </mat-select>
+                  </mat-form-field>
+                </td>
+              </ng-container>
+              <ng-container matColumnDef="description">
+                <th mat-header-cell *matHeaderCellDef> Description </th>
+                <td mat-cell *matCellDef="let service">{{service.get('description')?.value}}</td>
+              </ng-container>
+              <ng-container matColumnDef="price">
+                <th mat-header-cell *matHeaderCellDef> Prix </th>
+                <td mat-cell *matCellDef="let service">{{service.get('price')?.value}}</td>
+              </ng-container>
+              <ng-container matColumnDef="status">
+                <th mat-header-cell *matHeaderCellDef> Statut </th>
+                <td mat-cell *matCellDef="let service">{{service.get('status')?.value}}</td>
+              </ng-container>
+              <ng-container matColumnDef="actions">
+                <th mat-header-cell *matHeaderCellDef> Actions </th>
+                <td mat-cell *matCellDef="let service; let i = index">
+                  <button mat-button (click)="removeService(i)">Supprimer</button>
+                </td>
+              </ng-container>
+              <tr mat-header-row *matHeaderRowDef="['serviceName', 'description', 'price', 'status', 'actions']"></tr>
+              <tr mat-row *matRowDef="let row; columns: ['serviceName', 'description', 'price', 'status', 'actions'];"></tr>
+            </table>
+          </div>
+        </div>
+        <div fxLayout="row" fxLayoutAlign="end center" fxLayoutGap="16px">
+          <button mat-raised-button color="primary" type="submit" [disabled]="editForm.invalid">Enregistrer</button>
+        </div>
+      </form>
+    </mat-card-content>
+  </mat-card>
+</div>

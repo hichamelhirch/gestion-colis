@@ -1,0 +1,32 @@
+mat-dialog-title {
+  display: flex;
+  align-items: center;
+  font-weight: bold;
+  font-size: 24px; /* Augmentez la taille de la police */
+}
+
+mat-dialog-title mat-icon {
+  margin-right: 8px;
+  color: #4caf50; /* Utilisez une couleur verte agréable */
+  font-size: 32px; /* Augmentez la taille de l'icône */
+}
+
+mat-dialog-content {
+  padding: 20px;
+  font-size: 18px; /* Augmentez légèrement la taille de la police */
+  color: #555; /* Changez la couleur pour un gris plus doux */
+}
+
+mat-dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  padding: 16px 8px; /* Ajoutez plus de padding pour un meilleur espacement */
+}
+
+button {
+  margin-left: 10px;
+  display: flex;
+  align-items: center;
+  padding: 8px 16px; /* Ajoutez du padding pour rendre le bouton plus grand */
+  font-size: 16px; /* Augmentez la taille de la police du bouton */
+}

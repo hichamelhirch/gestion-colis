@@ -1,0 +1,78 @@
+<mat-toolbar color="primary" class="toolbar">
+  <button mat-icon-button (click)="drawer.toggle()">
+    <mat-icon>menu</mat-icon>
+  </button>
+
+  <span class="spacer"></span>
+
+  <mat-form-field appearance="outline" class="search-bar">
+    <mat-label>Rechercher</mat-label>
+    <input matInput [(ngModel)]="searchQuery" placeholder="Recherche...">
+  </mat-form-field>
+  <button mat-icon-button color="accent" (click)="searchColis()">
+    <mat-icon>search</mat-icon>
+  </button>
+
+  <span class="spacer"></span>
+
+  <button mat-button routerLink="/home" routerLinkActive="active">Accueil</button>
+  <button mat-button routerLink="/home/profile" routerLinkActive="active">Profil</button>
+
+  <button mat-button routerLink="/home/create-colis-individual" class="create-button">Créer</button>
+
+  <button mat-button [matMenuTriggerFor]="menu" class="import-button">Importer</button>
+  <mat-menu #menu="matMenu">
+    <button mat-menu-item routerLink="create-colis-bulk" routerLinkActive="active">
+      <mat-icon>list</mat-icon>
+      <span>Charger des colis en masse</span>
+    </button>
+    <button mat-menu-item routerLink="create-colis-individual" routerLinkActive="active">
+      <mat-icon>add_circle</mat-icon>
+      <span>Charger des colis individuels</span>
+    </button>
+  </mat-menu>
+
+  <!-- Bouton d'aide -->
+  <button mat-icon-button color="primary" (click)="openChatbot()">
+    <mat-icon>help_outline</mat-icon>
+  </button>
+
+  <button mat-raised-button color="warn" class="logout-button" (click)="handleLogout()">Déconnexion</button>
+</mat-toolbar>
+
+<mat-drawer-container class="drawer-container">
+  <mat-drawer #drawer mode="side" class="drawer">
+    <mat-nav-list>
+      <mat-list-item>
+        <button mat-button routerLink="/home" routerLinkActive="active">
+          <mat-icon>dashboard</mat-icon>
+          Tableau de bord
+        </button>
+      </mat-list-item>
+      <mat-list-item>
+        <button mat-button routerLink="/home/colislist" routerLinkActive="active">
+          <mat-icon>local_shipping</mat-icon>
+          Colis
+        </button>
+      </mat-list-item>
+      <mat-list-item>
+        <button mat-button routerLink="/colis-livres" routerLinkActive="active">
+          <mat-icon>check_circle</mat-icon>
+          Colis Livrés
+        </button>
+      </mat-list-item>
+      <mat-list-item>
+        <button mat-button routerLink="/colis-en-cours" routerLinkActive="active">
+          <mat-icon>hourglass_top</mat-icon>
+          Colis en cours de traitement
+        </button>
+      </mat-list-item>
+    </mat-nav-list>
+  </mat-drawer>
+
+  <mat-drawer-content>
+    <div class="main-content">
+      <router-outlet></router-outlet>
+    </div>
+  </mat-drawer-content>
+</mat-drawer-container>

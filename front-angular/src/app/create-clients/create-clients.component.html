@@ -1,0 +1,47 @@
+<div>
+  <mat-card>
+    <mat-card-title>Créer un Client</mat-card-title>
+    <mat-card-content>
+      <form [formGroup]="clientForm" (ngSubmit)="onSubmit()">
+        <mat-form-field appearance="fill">
+          <mat-label>Nom</mat-label>
+          <input matInput formControlName="nomClient">
+        </mat-form-field>
+        <mat-form-field appearance="fill">
+          <mat-label>Prénom</mat-label>
+          <input matInput formControlName="prenomClient">
+        </mat-form-field>
+        <mat-form-field appearance="fill">
+          <mat-label>Ville Client</mat-label>
+          <input type="text" matInput formControlName="villeClient" [matAutocomplete]="auto">
+          <mat-autocomplete #auto="matAutocomplete" [displayWith]="displayVille">
+            <mat-option *ngFor="let ville of filteredVilles | async" [value]="ville">
+              {{ ville.ville }}
+            </mat-option>
+          </mat-autocomplete>
+        </mat-form-field>
+        <mat-form-field appearance="fill">
+          <mat-label>Adresse</mat-label>
+          <input matInput formControlName="adresseClient">
+        </mat-form-field>
+        <mat-form-field appearance="fill">
+          <mat-label>Date de Naissance</mat-label>
+          <input matInput formControlName="dateNaissance" type="date">
+        </mat-form-field>
+        <mat-form-field appearance="fill">
+          <mat-label>Email</mat-label>
+          <input matInput formControlName="email" type="email">
+        </mat-form-field>
+        <mat-form-field appearance="fill">
+          <mat-label>Téléphone</mat-label>
+          <input matInput formControlName="tel">
+        </mat-form-field>
+        <mat-form-field appearance="fill">
+          <mat-label>Mot de passe</mat-label>
+          <input matInput formControlName="password" type="password">
+        </mat-form-field>
+        <button mat-raised-button color="primary" type="submit">Créer</button>
+      </form>
+    </mat-card-content>
+  </mat-card>
+</div>

@@ -1,0 +1,89 @@
+.colis-list {
+  margin: 20px;
+  position: relative;
+}
+
+.help-icon {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+}
+
+table {
+  width: 100%;
+}
+
+th.mat-header-cell, td.mat-cell {
+  text-align: center;
+}
+
+.totals {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 10px;
+}
+
+.total-box {
+  background-color: #f0f0f0;
+  border: 1px solid #d0d0d0;
+  padding: 10px;
+  margin-left: 10px;
+  border-radius: 4px;
+  font-weight: bold;
+}
+
+.status-case {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.actions-case {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.badge {
+  display: inline-block;
+  padding: 5px 10px;
+  border-radius: 4px;
+  color: white;
+  font-size: 12px;
+}
+
+.badge.confirmed {
+  background-color: green;
+}
+
+.badge.draft {
+  background-color: gray;
+}
+
+.badge.cancelled {
+  background-color: red;
+}
+
+button[disabled] {
+  cursor: not-allowed;
+  background-color: #ccc !important;
+  color: #666 !important;
+}
+
+.action-cell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.action-button {
+  margin: 0 5px;
+}
+
+.mat-icon {
+  font-size: 24px; /* Ajustez cette taille si nécessaire */
+}
+
+button[disabled] .mat-icon {
+  color: rgba(0, 0, 0, 0.26); /* Couleur des icônes désactivées */
+}

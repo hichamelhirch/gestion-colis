@@ -1,0 +1,79 @@
+<div id="colis-details" *ngIf="colis" class="pdf-container">
+  <h2 class="pdf-title">Détails du Colis</h2>
+
+  <table class="details-table mat-elevation-z8">
+    <tr>
+      <th>Numéro de Colis</th>
+      <td>{{ colis.numeroColis }}</td>
+    </tr>
+    <tr>
+      <th>Type de Livraison</th>
+      <td>{{ colis.typeLivraison }}</td>
+    </tr>
+    <tr>
+      <th>Nom du Destinataire</th>
+      <td>{{ colis.nomDestinataire }}</td>
+    </tr>
+    <tr>
+      <th>Téléphone du Destinataire</th>
+      <td>{{ colis.telDestinataire }}</td>
+    </tr>
+    <tr>
+      <th>Adresse du Destinataire</th>
+      <td>{{ colis.adresseDestinataire }}</td>
+    </tr>
+    <tr>
+      <th>Ville du Destinataire</th>
+      <td>{{ colis.villeDestinataire.ville }}</td>
+    </tr>
+    <tr>
+      <th>Cash à la Livraison</th>
+      <td>{{ colis.cashDelivery }} DH</td>
+    </tr>
+    <tr>
+      <th>Description</th>
+      <td>{{ colis.description }}</td>
+    </tr>
+    <tr>
+      <th>Dimensions</th>
+      <td>{{ colis.poids }} kg, {{ colis.longueur }} x {{ colis.largeur }} x {{ colis.hauteur }} cm</td>
+    </tr>
+    <tr>
+      <th>Frais</th>
+      <td>{{ colis.frais }} DH</td>
+    </tr>
+    <tr>
+      <th>Adresse Client</th>
+      <td>{{ colis.client.adresseClient }}</td>
+    </tr>
+    <tr>
+      <th>Date de Création</th>
+      <td>{{ colis.creationDate | date:'short' }}</td>
+    </tr>
+    <tr>
+      <th>Ville de Départ</th>
+      <td>{{ colis.villeDepart.ville }}</td>
+    </tr>
+    <tr>
+      <th>Première Adresse du Chargeur</th>
+      <td>{{ colis.premiereAdresseChargeur }}</td>
+    </tr>
+    <tr>
+      <th>Deuxième Adresse du Chargeur</th>
+      <td>{{ colis.deuxiemeAdresseChargeur }}</td>
+    </tr>
+    <tr>
+      <th>Numéro de Téléphone du Chargeur</th>
+      <td>{{ colis.numTelChargeur }}</td>
+    </tr>
+  </table>
+
+  <!-- Buttons for downloading and returning to the list -->
+  <div class="button-group">
+    <button mat-raised-button color="primary" (click)="downloadPDF()">Télécharger</button>
+    <button mat-raised-button color="accent" (click)="goBack()">Retour </button>
+  </div>
+</div>
+<div *ngIf="!colis">
+  <p>Aucun détail disponible pour ce colis.</p>
+</div>

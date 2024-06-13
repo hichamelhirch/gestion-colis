@@ -1,0 +1,22 @@
+<div class="login-container">
+  <mat-card class="login-card">
+    <img src="assets/logo.jpeg" alt="Company Logo" class="logo">
+    <mat-card-content>
+      <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+        <mat-form-field appearance="fill" class="form-field">
+          <mat-label>Email</mat-label>
+          <input matInput formControlName="email" required>
+        </mat-form-field>
+        <mat-form-field appearance="fill" class="form-field">
+          <mat-label>Password</mat-label>
+          <input matInput [type]="hide ? 'password' : 'text'" formControlName="password" required>
+          <button type="button" mat-icon-button matSuffix (click)="hide = !hide">
+            <mat-icon>{{hide ? 'visibility_off' : 'visibility'}}</mat-icon>
+          </button>
+        </mat-form-field>
+        <button mat-raised-button color="primary" type="submit" [disabled]="loginForm.invalid" class="login-button">Login</button>
+      </form>
+      <div *ngIf="errorMessage" class="error-message">{{ errorMessage }}</div>
+    </mat-card-content>
+  </mat-card>
+</div>
