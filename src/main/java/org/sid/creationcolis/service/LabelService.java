@@ -19,16 +19,16 @@ import java.nio.file.Paths;
 public class LabelService {
 
     public Path generateLabel(String barcode, String chargerName, String receiverName) throws Exception {
-        // Définir le chemin de sauvegarde
+        // Definir le chemin de sauvegarde
         Path filePath = Paths.get(System.getProperty("java.io.tmpdir"), "label.pdf"); // Chemin temporaire
 
-        // Générer le code-barres
+        // Generer le code-barres
         BitMatrix bitMatrix = new MultiFormatWriter().encode(barcode, BarcodeFormat.CODE_128, 200, 100);
         ByteArrayOutputStream pngOutputStream = new ByteArrayOutputStream();
         MatrixToImageWriter.writeToStream(bitMatrix, "PNG", pngOutputStream);
         byte[] pngData = pngOutputStream.toByteArray();
 
-        // Créer le document PDF
+        // Creer le document PDF
         try (PDDocument document = new PDDocument()) {
             PDPage page = new PDPage();
             document.addPage(page);

@@ -1,0 +1,15 @@
+.email-composer-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px;
+}
+
+mat-form-field {
+  width: 100%;
+  max-width: 600px;
+}
+
+button {
+  margin-top: 20px;
+}

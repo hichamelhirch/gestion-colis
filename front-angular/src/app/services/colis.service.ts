@@ -57,8 +57,10 @@ export class ColisService {
     return this.http.post<any>(`${this.apiUrl}/importCSV`, formData);
   }
   updateColisStatusToConfirmed(id: number): Observable<void> {
+    console.log(`Calling updateColisStatusToConfirmed for ID: ${id}`); // Log pour vérifier l'appel API
     return this.http.post<void>(`${this.apiUrl}/updateStatus/${id}`, {});
   }
+
   updateColisStatusToCancel(id: number): Observable<void> {
     return this.http.post<void>(`${this.apiUrl}/updateStatusToCancel/${id}`, {});
   }
@@ -79,5 +81,16 @@ export class ColisService {
   }
 
 
+  downloadMultipleLabels(colisIds: number[]): Observable<Blob> {
+    const params = new HttpParams().set('colisIds', colisIds.join(','));
+    return this.http.get(`${this.apiUrl}/download-multiple-labels`, { params, responseType: 'blob' });
+  }
 
+  filterColis(statuses: StatutColis[]): Observable<Colis[]> {
+    let params = new HttpParams();
+    statuses.forEach(status => {
+      params = params.append('status', status);
+    });
+    return this.http.get<Colis[]>(`${this.apiUrl}/filter`, { params });
+  }
 }

@@ -15,6 +15,8 @@ import {MAT_DIALOG_DATA, MatDialogRef} from "@angular/material/dialog";
 import {ColisDetailsComponent} from "./colis-details/colis-details.component";
 import {EditColisComponent} from "./edit-colis/edit-colis.component";
 import {ProfileComponent} from "./profile/profile.component";
+import {EmailComposerComponent} from "./email-composer/email-composer.component";
+import {FilterDialogComponent} from "./filter-dialog/filter-dialog.component";
 
 const routes: Routes = [
   {
@@ -29,18 +31,22 @@ const routes: Routes = [
       { path: 'colislist', component: StockColisComponent },
       { path: 'edit-colis/:id', component: EditColisComponent },
       { path: 'colis-details/:id', component: ColisDetailsComponent },
-      {path:'profile',component:ProfileComponent},
+      { path: 'email-composer', component: EmailComposerComponent },
+      { path: 'profile', component: ProfileComponent },
+      {path:'filter',component:FilterDialogComponent},
       { path: '', redirectTo: '/home', pathMatch: 'full' },
     ]
   },
-
   { path: 'login', component: LoginComponent },
+  { path: '', redirectTo: '/login', pathMatch: 'full' },
+  { path: '**', redirectTo: '/login' }
 ];
 
 providers: [
     { provide: HTTP_INTERCEPTORS, useClass: TokenInterceptor, multi: true },
   { provide: MAT_DIALOG_DATA, useValue: {} },
-  { provide: MatDialogRef, useValue: {} }
+  { provide: MatDialogRef, useValue: {} },
+
 ]
 @NgModule({
   imports: [RouterModule.forRoot(routes)],

@@ -49,11 +49,7 @@ public class Colis {
     private Client client;
     private LocalDateTime creationDate;
 
-   /* @ManyToOne
-    @JoinColumn(name = "point_relais_id", nullable = true)
-    private PointRelais pointRelais;
- //   private TypeChargeur typeChargeur;
-    */
+
 
     // Adresse de Livraison
     @ManyToOne

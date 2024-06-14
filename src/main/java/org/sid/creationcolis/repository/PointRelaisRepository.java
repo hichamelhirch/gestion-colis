@@ -6,5 +6,5 @@ import org.springframework.stereotype.Repository;
 
 
 public interface PointRelaisRepository extends JpaRepository<PointRelais,Long> {
-    PointRelais findByEmail(String email);
+
 }

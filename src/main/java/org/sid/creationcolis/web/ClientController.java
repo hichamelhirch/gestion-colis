@@ -1,7 +1,9 @@
 package org.sid.creationcolis.web;
 
 import org.sid.creationcolis.dtos.ClientDTO;
-import org.sid.creationcolis.entities.ServiceALivraison;
+import org.sid.creationcolis.entities.Client;
+import org.sid.creationcolis.entities.User;
+import org.sid.creationcolis.service.AuthService;
 import org.sid.creationcolis.service.ClientService;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.EnableCaching;
@@ -17,9 +19,11 @@ import java.util.List;
 public class ClientController {
 
     private final ClientService clientService;
+    private final AuthService authService;
 
-    public ClientController(ClientService clientService) {
+    public ClientController(ClientService clientService, AuthService authService) {
         this.clientService = clientService;
+        this.authService = authService;
     }
 
     @GetMapping
@@ -75,6 +79,16 @@ public class ClientController {
             return ResponseEntity.ok(client);
         } else {
             return ResponseEntity.notFound().build();
+        }
+    }
+
+    @GetMapping("/clientAuth")
+    public Client getAuthenticatedClient() {
+        User authenticatedUser = authService.getAuthenticatedUser();
+        if (authenticatedUser != null) {
+            return authenticatedUser.getClient();
+        } else {
+            throw new RuntimeException("User not authenticated");
         }
     }
 }

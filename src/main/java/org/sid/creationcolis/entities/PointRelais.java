@@ -15,8 +15,7 @@ public class PointRelais  {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-     private String password;
-     private String email;
+
     private String adresse;
     private String nomPointRelai;
     private String numeroTel;
@@ -24,6 +23,4 @@ public class PointRelais  {
     @ManyToOne
     private Ville ville;
 
-    @Enumerated(EnumType.STRING)
-    private TypeChargeur typeChargeur;
 }

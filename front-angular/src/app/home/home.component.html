@@ -5,6 +5,12 @@
 
   <span class="spacer"></span>
 
+  <!-- Bouton de filtre -->
+
+  <button mat-icon-button (click)="openFilterDialog()">
+    <mat-icon>filter_list</mat-icon>
+  </button>
+
   <mat-form-field appearance="outline" class="search-bar">
     <mat-label>Rechercher</mat-label>
     <input matInput [(ngModel)]="searchQuery" placeholder="Recherche...">
@@ -15,10 +21,11 @@
 
   <span class="spacer"></span>
 
-  <button mat-button routerLink="/home" routerLinkActive="active">Accueil</button>
+  <button mat-button routerLink="/home/colislist" routerLinkActive="active">Accueil</button>
   <button mat-button routerLink="/home/profile" routerLinkActive="active">Profil</button>
 
   <button mat-button routerLink="/home/create-colis-individual" class="create-button">Créer</button>
+  <button mat-button routerLink="/home/email-composer" >Messagerie</button>
 
   <button mat-button [matMenuTriggerFor]="menu" class="import-button">Importer</button>
   <mat-menu #menu="matMenu">
@@ -31,11 +38,16 @@
       <span>Charger des colis individuels</span>
     </button>
   </mat-menu>
-
+  <!-- Bouton de messagerie -->
+<!--  <button mat-icon-button color="primary" (click)="sendEmail()">
+    <mat-icon>email</mat-icon>
+  </button> -->
   <!-- Bouton d'aide -->
   <button mat-icon-button color="primary" (click)="openChatbot()">
     <mat-icon>help_outline</mat-icon>
   </button>
+
+
 
   <button mat-raised-button color="warn" class="logout-button" (click)="handleLogout()">Déconnexion</button>
 </mat-toolbar>
@@ -71,6 +83,7 @@
   </mat-drawer>
 
   <mat-drawer-content>
+
     <div class="main-content">
       <router-outlet></router-outlet>
     </div>

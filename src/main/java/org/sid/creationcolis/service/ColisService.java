@@ -200,17 +200,17 @@ public class ColisService {
         logger.debug("Adding service to colis with ID: {}", id);
         logger.debug("New service ID: {}", newServiceId);
 
-        // Vérifier si le service existe
+        // Verifier si le service existe
         ServiceALivraison existingService = serviceALivraisonRepository.findById(newServiceId)
                 .orElseThrow(() -> new RuntimeException("Service non trouvé"));
 
-        // Récupérer le colis
+        // Recuperer le colis
         Optional<Colis> colisOptional = colisRepository.findById(id);
 
         if (colisOptional.isPresent()) {
             Colis existingColis = colisOptional.get();
 
-            // Vérifier si le service n'est pas déjà associé au colis
+            // Verifier si le service n'est pas deje associe au colis
             if (!existingColis.getServices().contains(existingService)) {
                 existingColis.getServices().add(existingService);
 
@@ -348,9 +348,9 @@ public class ColisService {
     }
 
     private String formatBarcodeText(String text) {
-        // Group the text into 4-character segments separated by spaces
+        // pour un espace de 4 caracteres separees
         StringBuilder formattedText = new StringBuilder();
-        int length = Math.min(text.length(), 12); // Ensure we only take up to 12 characters
+        int length = Math.min(text.length(), 12);
         for (int i = 0; i < length; i += 4) {
             if (i > 0) {
                 formattedText.append(" ");
@@ -369,7 +369,7 @@ public class ColisService {
             String barcodeText = colis.getCodeBarre();
             logger.info("Barcode Text: {}", barcodeText);
 
-            // Log values to ensure they are not null or empty
+
             logger.info("Nom du client: {}", colis.getClient().getNomClient());
             logger.info("Nom du destinataire: {}", colis.getNomDestinataire());
             logger.info("Adresse: {}", colis.getAdresseDestinataire());
@@ -392,7 +392,7 @@ public class ColisService {
                 PDPage page = new PDPage(pageSize);
                 document.addPage(page);
                 try (PDPageContentStream contentStream = new PDPageContentStream(document, page)) {
-                    // Add client and recipient details at the top
+
                     contentStream.beginText();
                     contentStream.setFont(PDType1Font.HELVETICA_BOLD, 12);
                     contentStream.newLineAtOffset(20, 130);
@@ -405,14 +405,14 @@ public class ColisService {
                     contentStream.showText("Téléphone: " + (colis.getTelDestinataire() != null ? colis.getTelDestinataire() : ""));
                     contentStream.endText();
 
-                    // Draw the barcode below the details
-                    PDImageXObject pdImage = PDImageXObject.createFromFile(tempFile.toString(), document);
-                    contentStream.drawImage(pdImage, 20, 40, 150, 40); // Adjusted barcode size and position
 
-                    // Add the barcode text directly below the barcode image
+                    PDImageXObject pdImage = PDImageXObject.createFromFile(tempFile.toString(), document);
+                    contentStream.drawImage(pdImage, 20, 40, 150, 40);
+
+
                     contentStream.beginText();
                     contentStream.setFont(PDType1Font.HELVETICA, 10);
-                    contentStream.newLineAtOffset(40, 30); // Position the text just below the barcode
+                    contentStream.newLineAtOffset(40, 30);
                     contentStream.showText(formatBarcodeText(barcodeText));
                     contentStream.endText();
                 }
@@ -428,7 +428,7 @@ public class ColisService {
     }
 
     public ResponseEntity<Resource> downloadLabel(Long id) throws IOException {
-        // Update the status to confirmed if not already confirmed
+
         Optional<Colis> colisOptional = colisRepository.findById(id);
         if (colisOptional.isPresent()) {
             Colis colis = colisOptional.get();
@@ -440,7 +440,7 @@ public class ColisService {
             throw new IOException("Colis non trouvé pour l'ID: " + id);
         }
 
-        // Continue with the download
+
         String userHome = System.getProperty("user.home");
         String downloadDirectory = userHome + File.separator + "Downloads";
         String filePath = downloadDirectory + File.separator + "label_" + id + ".pdf";
@@ -619,15 +619,20 @@ public class ColisService {
         Optional<Colis> colisOptional = colisRepository.findById(colisId);
         if (colisOptional.isPresent()) {
             Colis colis = colisOptional.get();
-            if (colis.getStatusColis() == StatutColis.BROUILLON && colis.getStatusColis()!=StatutColis.ANNULER) {
+            logger.info("Current status of colis with ID {}: {}", colisId, colis.getStatusColis());
+            if (colis.getStatusColis() == StatutColis.BROUILLON && colis.getStatusColis() != StatutColis.ANNULER) {
                 colis.setStatusColis(StatutColis.CONFIRMER);
                 colisRepository.save(colis);
                 logger.info("Updated colis with ID: {} to CONFIRMER", colisId);
+            } else {
+                logger.warn("Colis with ID: {} is not in BROUILLON status or is already CONFIRMER", colisId);
             }
         } else {
             logger.warn("Colis not found for ID: {}", colisId);
         }
     }
+
+
 
 
     @Transactional
@@ -645,4 +650,64 @@ public class ColisService {
         }
     }
 
+
+
+
+    public ByteArrayOutputStream generateMultipleLabelsPDF(List<Long> colisIds) throws IOException {
+        PDDocument document = new PDDocument();
+        for (Long colisId : colisIds) {
+            ColisDTO colis = getColisById(colisId);
+            if (colis != null && colis.getStatusColis() != StatutColis.ANNULER) {
+                PDPage page = new PDPage(new PDRectangle(288, 144));
+                document.addPage(page);
+                try (PDPageContentStream contentStream = new PDPageContentStream(document, page)) {
+                    addLabelToPage(contentStream, document, colis);
+                }
+
+            }
+
+        }
+
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        document.save(out);
+        document.close();
+        return out;
+    }
+
+
+    private void addLabelToPage(PDPageContentStream contentStream, PDDocument document, ColisDTO colis) throws IOException {
+        String barcodeText = colis.getCodeBarre();
+        byte[] barcodeImageBytes = generateBarcode(barcodeText);
+        Path tempFile = Files.createTempFile("barcode", ".png");
+        Files.write(tempFile, barcodeImageBytes);
+
+        contentStream.beginText();
+        contentStream.setFont(PDType1Font.HELVETICA_BOLD, 12);
+        contentStream.newLineAtOffset(20, 130);
+        contentStream.showText("Nom du client: " + (colis.getClient().getNomClient() != null ? colis.getClient().getNomClient() : ""));
+        contentStream.newLineAtOffset(0, -15);
+        contentStream.showText("Nom du destinataire: " + (colis.getNomDestinataire() != null ? colis.getNomDestinataire() : ""));
+        contentStream.newLineAtOffset(0, -15);
+        contentStream.showText("Adresse: " + (colis.getAdresseDestinataire() != null ? colis.getAdresseDestinataire() : ""));
+        contentStream.newLineAtOffset(0, -15);
+        contentStream.showText("Téléphone: " + (colis.getTelDestinataire() != null ? colis.getTelDestinataire() : ""));
+        contentStream.endText();
+
+        PDImageXObject pdImage = PDImageXObject.createFromFile(tempFile.toString(), document);
+        contentStream.drawImage(pdImage, 20, 40, 150, 40);
+
+        contentStream.beginText();
+        contentStream.setFont(PDType1Font.HELVETICA, 10);
+        contentStream.newLineAtOffset(40, 30);
+        contentStream.showText(formatBarcodeText(barcodeText));
+        contentStream.endText();
+
+        Files.delete(tempFile);
+    }
+
+    public List<ColisDTO> filterColis(List<StatutColis> statutColisList) {
+        return colisRepository.findByStatusColisIn(statutColisList).stream()
+                .map(colisMapper::toDTO)
+                .collect(Collectors.toList());
+    }
 }

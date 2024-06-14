@@ -71,9 +71,9 @@ export interface RegionDTO {
 
 // Enums
 export enum StatutColis {
-  BROUILLON,
-  CONFIRMER,
-  ANNULER
+  CONFIRMER = 'CONFIRMER',
+  BROUILLON = 'BROUILLON',
+  ANNULER = 'ANNULER'
 }
 // colis.model.ts
 

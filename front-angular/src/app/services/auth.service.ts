@@ -28,6 +28,8 @@ export class AuthService {
     localStorage.removeItem('authToken');
   }
 
-
+  get isAuthenticated(): boolean {
+    return this.getToken() !== null;
+  }
 
 }

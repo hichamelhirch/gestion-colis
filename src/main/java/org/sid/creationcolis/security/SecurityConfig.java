@@ -24,7 +24,7 @@ public class SecurityConfig {
 
     @Bean
     public PasswordEncoder passwordEncoder() {
-        // Use NoOpPasswordEncoder to store passwords in plain text
+        // on utilise NoOpPasswordEncoder pour stocker les mots de passe en texte clair
         return NoOpPasswordEncoder.getInstance();
     }
 
@@ -51,6 +51,7 @@ public class SecurityConfig {
         http.csrf().disable()
                 .authorizeHttpRequests(authorizeRequests ->
                         authorizeRequests
+                                // qst:403
                                 .requestMatchers("/auth/authenticate", "/auth/register","/download-label/**","/api/colis/**","/removeServices/**","/addService/**","/api/clients/**").permitAll()
                                 .anyRequest().authenticated()
                 )

@@ -1,0 +1,12 @@
+<h1 mat-dialog-title>Filtrer les colis</h1>
+<div mat-dialog-content>
+  <form [formGroup]="filterForm">
+    <mat-checkbox formControlName="confirmed">Confirmé</mat-checkbox><br>
+    <mat-checkbox formControlName="draft">Brouillon</mat-checkbox><br>
+    <mat-checkbox formControlName="cancelled">Annulé</mat-checkbox>
+  </form>
+</div>
+<div mat-dialog-actions>
+  <button mat-button (click)="onCancel()">Annuler</button>
+  <button mat-button color="primary" (click)="onConfirm()">Appliquer</button>
+</div>

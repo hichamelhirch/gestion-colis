@@ -4,9 +4,11 @@ import org.sid.creationcolis.dtos.ColisDTO;
 import org.sid.creationcolis.entities.Client;
 import org.sid.creationcolis.entities.Colis;
 import org.sid.creationcolis.entities.Ville;
+import org.sid.creationcolis.enums.StatutColis;
 import org.sid.creationcolis.service.ColisService;
 import org.sid.creationcolis.service.LabelService;
 import org.sid.creationcolis.service.VilleService;
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
@@ -17,9 +19,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
+import java.io.*;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashMap;
@@ -214,4 +214,19 @@ public class ColisController {
         colisService.updateColisStatusToCancel(id);
     }
 
+    @GetMapping("/download-multiple-labels")
+    public ResponseEntity<ByteArrayResource> downloadMultipleLabels(@RequestParam List<Long> colisIds) throws IOException {
+        ByteArrayOutputStream out = colisService.generateMultipleLabelsPDF(colisIds);
+        ByteArrayResource resource = new ByteArrayResource(out.toByteArray());
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=etiquettes-combinees.pdf")
+                .contentType(MediaType.APPLICATION_PDF)
+                .contentLength(resource.contentLength())
+                .body(resource);
+    }
+    @GetMapping("/filter")
+    public List<ColisDTO> filterColis(@RequestParam List<StatutColis> status) {
+        return colisService.filterColis(status);
+    }
 }

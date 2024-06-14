@@ -1,0 +1,24 @@
+<div class="email-composer-container">
+  <form *ngIf="userEmail" [formGroup]="emailForm" (ngSubmit)="sendEmail()">
+    <mat-form-field appearance="outline">
+      <mat-label>Sujet</mat-label>
+      <input matInput formControlName="subject" placeholder="Sujet">
+      <mat-error *ngIf="emailForm.get('subject')?.hasError('required')">
+        Le sujet est obligatoire.
+      </mat-error>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Message</mat-label>
+      <textarea matInput formControlName="message" placeholder="Message"></textarea>
+      <mat-error *ngIf="emailForm.get('message')?.hasError('required')">
+        Le message est obligatoire.
+      </mat-error>
+    </mat-form-field>
+
+    <button mat-raised-button color="primary" type="submit" [disabled]="emailForm.invalid">Envoyer</button>
+  </form>
+  <div *ngIf="!userEmail">
+    <p>Chargement des informations utilisateur...</p>
+  </div>
+</div>

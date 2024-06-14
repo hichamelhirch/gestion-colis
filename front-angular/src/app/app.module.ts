@@ -1,4 +1,4 @@
-import { NgModule } from '@angular/core';
+import {CUSTOM_ELEMENTS_SCHEMA, NgModule} from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 
 
@@ -47,6 +47,10 @@ import {FlexLayoutModule} from "@angular/flex-layout";
 import {AuthService} from "./services/auth.service";
 import { ProfileComponent } from './profile/profile.component';
 import {AuthGuard} from "./guards/auth.guard";
+import { EmailComposerComponent } from './email-composer/email-composer.component';
+import { CancelDialogComponent } from './cancel-dialog/cancel-dialog.component';
+import { FilterDialogComponent } from './filter-dialog/filter-dialog.component';
+import { FilteredColisComponent } from './filtered-colis/filtered-colis.component';
 
 @NgModule({
   declarations: [
@@ -66,8 +70,13 @@ import {AuthGuard} from "./guards/auth.guard";
     ErrorMessagesComponent,
     ColisLabelComponent,
     EditColisComponent,
-    ProfileComponent
+    ProfileComponent,
+    EmailComposerComponent,
+    CancelDialogComponent,
+    FilterDialogComponent,
+    FilteredColisComponent
   ],
+
   imports: [
     BrowserModule,
     BrowserAnimationsModule,
@@ -120,6 +129,7 @@ import {AuthGuard} from "./guards/auth.guard";
 
 
   ],
+
   providers: [
     provideAnimationsAsync(),//{ provide: HTTP_INTERCEPTORS, useClass: TokenInterceptor, multi: true },
     AuthService,AuthGuard,
@@ -129,6 +139,7 @@ import {AuthGuard} from "./guards/auth.guard";
       multi: true
     }
   ],
+  schemas: [CUSTOM_ELEMENTS_SCHEMA],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

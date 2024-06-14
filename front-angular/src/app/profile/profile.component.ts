@@ -1,55 +1,61 @@
 import { Component, OnInit } from '@angular/core';
-import { AuthService } from '../services/auth.service';
-import { ClientService } from '../services/client.service';
+import { ProfileService } from '../services/profile.service';
 import { Client } from '../models/colis.model';
-import jwt_decode from 'jwt-decode'; // Importation par défaut correcte
+import { Location } from '@angular/common';
 
 @Component({
   selector: 'app-profile',
   templateUrl: './profile.component.html',
   styleUrls: ['./profile.component.css']
 })
-export class ProfileComponent  {
- /* client: Client | null = null;
-  errorMessage: string = '';
+export class ProfileComponent implements OnInit {
+  client!: Client;
+  isLoading: boolean = true;
 
-  constructor(
-    private authService: AuthService,
-    private clientService: ClientService
-  ) {}
+  constructor(private profileService: ProfileService, private location: Location) { }
 
   ngOnInit(): void {
-    const token = this.authService.getToken();
-    if (token) {
-      const decodedToken: any = this.decodeToken(token);
-      console.log('Decoded Token:', decodedToken); // Log le token décodé pour vérifier les valeurs
-      const userId = decodedToken ? decodedToken.userId : null; // Assurez-vous que userId est extrait correctement
-      console.log('User ID:', userId); // Log userId pour s'assurer qu'il est présent
-      if (userId) {
-        this.clientService.getClientByUserId(userId).subscribe(
-          (data: Client) => {
-            this.client = data;
-          },
-          error => {
-            this.errorMessage = 'Erreur lors du chargement des informations du client';
-            console.error('Failed to load client data', error);
-          }
-        );
-      } else {
-        this.errorMessage = 'ID utilisateur non trouvé dans le token';
+    this.profileService.getProfile().subscribe(
+      data => {
+        this.client = data;
+        this.isLoading = false;
+      },
+      error => {
+        console.error('Error fetching profile', error);
+        this.isLoading = false;
       }
-    }
+    );
   }
 
-  private decodeToken(token: string): any {
-    try {
-      // @ts-ignore
-      return jwt_decode(token); // Utilisation correcte de jwt-decode
-    } catch (error) {
-      console.error('Erreur lors du décodage du token', error);
-      return null;
-    }
+  goBack(): void {
+    this.location.back();
   }
 
-  */
+  shareProfile(option: string): void {
+    const message = `Profil Client:\n\nNom: ${this.client.nomClient}\nTéléphone: ${this.client.tel}\nAdresse: ${this.client.adresseClient}\nVille: ${this.client.villeClient.ville}`;
+
+    switch (option) {
+      case 'whatsapp':
+        const whatsappUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(message)}`;
+        window.open(whatsappUrl, '_blank');
+        break;
+      case 'email':
+        const mailtoUrl = `mailto:?subject=Profil Client&body=${encodeURIComponent(message)}`;
+        window.location.href = mailtoUrl;
+        break;
+      case 'other':
+        if (navigator.share) {
+          navigator.share({
+            title: 'Profil Client',
+            text: message,
+          })
+            .catch(error => console.error('Error sharing', error));
+        } else {
+          alert('Le partage via cette méthode n\'est pas supporté par votre navigateur.');
+        }
+        break;
+      default:
+        alert('Invalid sharing option.');
+    }
+  }
 }

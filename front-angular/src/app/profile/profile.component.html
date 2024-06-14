@@ -1,0 +1,35 @@
+<div class="profile-container" *ngIf="isLoading">
+  <p>Chargement des données...</p>
+</div>
+
+<div class="profile-container" *ngIf="!isLoading && client">
+  <mat-card class="profile-card">
+    <mat-card-header class="profile-header">
+      <img src="assets/logo.jpeg" alt="CashPlus Logo" class="profile-logo">
+    </mat-card-header>
+    <mat-card-content>
+      <div class="profile-title">
+        Bienvenue à CashPlus
+      </div>
+      <div class="profile-details">
+        <h2>{{ client.nomClient }}</h2>
+        <p><strong>Téléphone:</strong> {{ client.tel }}</p>
+        <p><strong>Adresse:</strong> {{ client.adresseClient }}</p>
+        <p><strong>Ville:</strong> {{ client.villeClient.ville }}</p>
+      </div>
+    </mat-card-content>
+    <mat-card-actions class="profile-actions">
+      <button mat-stroked-button color="primary" (click)="goBack()">Retour</button>
+      <button mat-stroked-button color="accent" [matMenuTriggerFor]="shareMenu">Partager</button>
+      <mat-menu #shareMenu="matMenu">
+        <button mat-menu-item (click)="shareProfile('whatsapp')">WhatsApp</button>
+        <button mat-menu-item (click)="shareProfile('email')">Email</button>
+        <button mat-menu-item (click)="shareProfile('other')">Autre</button>
+      </mat-menu>
+    </mat-card-actions>
+  </mat-card>
+</div>
+
+<div class="profile-container" *ngIf="!isLoading && !client">
+  <p>Erreur lors de la récupération des données du profil.</p>
+</div>

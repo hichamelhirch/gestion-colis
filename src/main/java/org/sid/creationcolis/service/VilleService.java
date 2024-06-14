@@ -221,7 +221,7 @@ public class VilleService {
         System.out.println("Similar Villes: " + similarVilles);
         return similarVilles;
     }
-
+    // pour les villes similaires
     private int calculateLevenshteinDistance(String str1, String str2) {
         int[][] dp = new int[str1.length() + 1][str2.length() + 1];
 
