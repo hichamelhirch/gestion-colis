@@ -22,7 +22,7 @@ import {FilterDialogComponent} from "../filter-dialog/filter-dialog.component";
   styleUrls: ['./stock-colis.component.css']
 })
 export class StockColisComponent implements OnInit {
-  displayedColumns: string[] = ['select', 'Numero', 'barcode', 'creationDate', 'chargeur', 'livreA', 'de', 'a', 'type', 'frais', 'crbt', 'status', 'actions'];
+  displayedColumns: string[] = ['select', 'Numero', 'barcode', 'creationDate', 'chargeur', 'livreA', 'de', 'a', 'type', 'frais', 'crbt', 'status','etatSuiviColis','actions'];
  dataSource: MatTableDataSource<Colis> = new MatTableDataSource<Colis>([]);
   filteredDataSource: MatTableDataSource<Colis> = new MatTableDataSource<Colis>([]);
   filterApplied: boolean = false;

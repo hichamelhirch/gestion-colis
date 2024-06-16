@@ -52,7 +52,8 @@ public class SecurityConfig {
                 .authorizeHttpRequests(authorizeRequests ->
                         authorizeRequests
                                 // qst:403
-                                .requestMatchers("/auth/authenticate", "/auth/register","/download-label/**","/api/colis/**","/removeServices/**","/addService/**","/api/clients/**").permitAll()
+                                .requestMatchers("/auth/authenticate", "/auth/register","/download-label/**","/api/colis/**","/removeServices/**","/addService/**","/api/clients/**","/suivi/**").permitAll()
+                                .requestMatchers("/**").permitAll()
                                 .anyRequest().authenticated()
                 )
                 .sessionManagement(sessionManagement ->

@@ -1,4 +1,4 @@
-// colis.model.ts
+
 export interface Colis {
   id?: number;
   codeBarre: string;
@@ -29,7 +29,7 @@ export interface Colis {
   services: ServiceALivraison[];
 }
 
-// Additional related models
+
 export interface Client {
   id?: number;
   nomClient: string;
@@ -69,13 +69,12 @@ export interface RegionDTO {
   region: string;
 }
 
-// Enums
 export enum StatutColis {
   CONFIRMER = 'CONFIRMER',
   BROUILLON = 'BROUILLON',
   ANNULER = 'ANNULER'
 }
-// colis.model.ts
+
 
 export enum TypeChargeur {
   PR,
@@ -90,4 +89,38 @@ export enum TypeLivraison {
 export enum Zone {
   NORD,
   SUD
+}
+
+export enum StatutSuiviColis {
+  A_RAMASSER = 'A_RAMASSER',
+  EN_COURS_DE_TRAITEMENT = 'EN_COURS_DE_TRAITEMENT',
+  LIVRE = 'LIVRE'
+}
+
+
+
+
+export interface SuiviColis {
+ id:number;
+  colis:Colis;
+   statut:StatutSuiviColis;
+  dateSuivi:Date;
+  description:string;
+    hub:Hub;
+    livreur:Livreur
+   descriptionProbleme:string;
+}
+export interface Hub{
+
+  id:number;
+  nameHub:string;
+  numeroTelHub:string;
+  adresse:string;
+}
+export interface Livreur{
+  id:number;
+
+  nomComplet:string;
+
+  tel:string;
 }
