@@ -1,0 +1,8 @@
+<div *ngIf="showRating" class="rating-container">
+  <span>Veuillez évaluer cette fonctionnalité :</span>
+  <div class="rating">
+    <mat-icon *ngFor="let star of stars; let i = index" (click)="rate(i + 1)">
+      {{ star ? 'star' : 'star_border' }}
+    </mat-icon>
+  </div>
+</div>

@@ -87,8 +87,8 @@
 
 
     <ng-container matColumnDef="etatSuiviColis">
-      <th mat-header-cell *matHeaderCellDef mat-sort-header> Etat</th>
-      <td mat-cell *matCellDef="let colis" class="etatSuiviColis-case">  </td>
+      <th mat-header-cell *matHeaderCellDef> État </th>
+      <td mat-cell *matCellDef="let colis"> {{colis.etatSuiviColis}} </td>
     </ng-container>
 
 

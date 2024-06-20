@@ -95,4 +95,6 @@ export class HomeComponent {
       this.filterApplied = true;
     });
   }
+
+
 }

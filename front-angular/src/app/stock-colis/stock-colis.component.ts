@@ -15,6 +15,7 @@ import { ChangeDetectorRef } from '@angular/core';
 import {CancelDialogComponent} from "../cancel-dialog/cancel-dialog.component";
 import {MatDialog} from "@angular/material/dialog";
 import {FilterDialogComponent} from "../filter-dialog/filter-dialog.component";
+import {SuiviColisService} from "../services/suivi-colis.service";
 
 @Component({
   selector: 'app-stock-colis',
@@ -34,12 +35,14 @@ export class StockColisComponent implements OnInit {
   @ViewChild(MatPaginator) paginator!: MatPaginator;
   @ViewChild(MatSort) sort!: MatSort;
 
+
   constructor(
     private colisService: ColisService,
     private snackBar: MatSnackBar,
     private router: Router,
     private cdr: ChangeDetectorRef,
-    private dialog: MatDialog
+    private dialog: MatDialog,
+    private suiviColisService: SuiviColisService
   ) {}
 
   ngOnInit(): void {
@@ -53,7 +56,9 @@ export class StockColisComponent implements OnInit {
       this.dataSource.sort = this.sort;
       this.sort.sort({ id: 'creationDate', start: 'desc', disableClear: false });
       this.calculateTotals();
-      this.updateSelections(); // Update selections when data changes
+      this.updateSelections();
+      this.loadSuiviColis();
+
     });
   }
 
@@ -70,7 +75,23 @@ export class StockColisComponent implements OnInit {
 
   onPageChange(): void {
     this.calculateTotals();
-    this.updateSelections();
+
+  }
+
+
+  loadSuiviColis(): void {
+    this.dataSource.data.forEach(colis => {
+      this.suiviColisService.getSuiviByColisId(colis.id!).subscribe(suivis => {
+        if (suivis.length > 0) {
+          // @ts-ignore
+          colis['etatSuiviColis'] = suivis[suivis.length - 1].statut; // Prendre le dernier suivi
+        } else {
+          // @ts-ignore
+          colis['etatSuiviColis'] = '';
+        }
+        this.dataSource._updateChangeSubscription(); // Update the table
+      });
+    });
   }
 
   copyToClipboard(text: string): void {

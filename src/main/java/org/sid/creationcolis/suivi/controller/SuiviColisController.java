@@ -2,6 +2,7 @@ package org.sid.creationcolis.suivi.controller;
 
 
 
+import org.sid.creationcolis.dtos.ColisDTO;
 import org.sid.creationcolis.suivi.Entity.SuiviColis;
 import org.sid.creationcolis.suivi.service.SuiviColisService;
 import org.springframework.http.ResponseEntity;
@@ -38,6 +39,11 @@ public class SuiviColisController {
         SuiviColis suiviColis = suiviColisService.traiterColis(colisId, hubId);
         return ResponseEntity.ok(suiviColis);
     }
+    @PostMapping("/{colisId}/enCoursDeLivraison")
+    public ResponseEntity<SuiviColis>  mettreEnCoursDeLivraison(@PathVariable Long colisId, @RequestParam Long livreurId) {
+        SuiviColis suiviColis = suiviColisService.mettreEnCoursDeLivraison(colisId, livreurId);
+        return ResponseEntity.ok(suiviColis);
+    }
 
    /*@PostMapping("/{colisId}/livrer")
     public ResponseEntity<SuiviColis> livrerColis(@PathVariable Long colisId, @RequestParam Long livreurId) {
@@ -51,7 +57,7 @@ public class SuiviColisController {
        SuiviColis suiviColis = suiviColisService.livrerColis(colisId, livreurId);
        return ResponseEntity.ok(suiviColis);
    }
-   /* @PutMapping("/{colisId}/probleme")
+    @PutMapping("/{colisId}/probleme")
     public ResponseEntity<SuiviColis> updateDescriptionProbleme(@PathVariable Long colisId,
                                                                 @RequestParam String description,
                                                                 @RequestParam String type,
@@ -60,11 +66,24 @@ public class SuiviColisController {
         return ResponseEntity.ok(suiviColis);
     }
 
-    */
 
-    @PostMapping("/{colisId}/livrerWhatssap")
+
+  /*  @PostMapping("/{colisId}/livrerWhatssap")
     public ResponseEntity<SuiviColis> livrerColiswht(@PathVariable Long colisId, @RequestParam Long livreurId) throws IOException {
         SuiviColis suiviColis = suiviColisService.livrerColisWhatSap(colisId, livreurId);
         return ResponseEntity.ok(suiviColis);
+    }
+
+   */
+
+
+    @GetMapping("/operations/{barcode}")
+    public ResponseEntity<List<String>> getOperationsByBarcode(@PathVariable String barcode) {
+        List<String> operations = suiviColisService.getOperationsByBarcode(barcode);
+        return ResponseEntity.ok(operations);
+    }
+    @GetMapping("/colis-livres")
+    public List<ColisDTO> getAllColisLivres() {
+        return suiviColisService.getAllColisLivres();
     }
 }

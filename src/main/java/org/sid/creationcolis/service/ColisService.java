@@ -710,4 +710,11 @@ public class ColisService {
                 .map(colisMapper::toDTO)
                 .collect(Collectors.toList());
     }
+
+    public ColisDTO getColisByBarcode(String barcode) {
+        Colis colis = colisRepository.findByCodeBarre(barcode)
+                .orElseThrow(() -> new RuntimeException("Colis not found with barcode " + barcode));
+        return colisMapper.toDTO(colis);
+    }
+
 }

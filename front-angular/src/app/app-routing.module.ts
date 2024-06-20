@@ -17,6 +17,7 @@ import {EditColisComponent} from "./edit-colis/edit-colis.component";
 import {ProfileComponent} from "./profile/profile.component";
 import {EmailComposerComponent} from "./email-composer/email-composer.component";
 import {FilterDialogComponent} from "./filter-dialog/filter-dialog.component";
+import {SuiviColisComponent} from "./suivi-colis/suivi-colis.component";
 
 const routes: Routes = [
   {
@@ -34,6 +35,9 @@ const routes: Routes = [
       { path: 'email-composer', component: EmailComposerComponent },
       { path: 'profile', component: ProfileComponent },
       {path:'filter',component:FilterDialogComponent},
+
+      { path: 'suivi-colis', component: SuiviColisComponent },
+      { path: 'suivi-colis/:status', component: SuiviColisComponent },
       { path: '', redirectTo: '/home', pathMatch: 'full' },
     ]
   },

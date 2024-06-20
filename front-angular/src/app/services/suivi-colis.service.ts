@@ -30,4 +30,25 @@ export class SuiviColisService {
     const params = new HttpParams().set('livreurId', livreurId.toString());
     return this.http.post<SuiviColis>(`${this.apiUrl}/${colisId}/livrer`, null, { params });
   }
+
+  getOperationsByBarcode(barcode: string): Observable<string[]> {
+    return this.http.get<string[]>(`${this.apiUrl}/operations/${barcode}`);
+  }
+
+  updateDescriptionProbleme(colisId: number, description: string, type: string, id: number): Observable<SuiviColis> {
+    const params = new HttpParams().set('description', description).set('type', type).set('id', id.toString());
+    return this.http.put<SuiviColis>(`${this.apiUrl}/${colisId}/updateDescriptionProbleme`, null, { params });
+  }
+
+  updateSuiviColisStatut(colisId: number, statut: string): Observable<SuiviColis> {
+    const params = new HttpParams().set('statut', statut);
+    return this.http.put<SuiviColis>(`${this.apiUrl}/${colisId}/updateSuiviColisStatut`, null, { params });
+  }
+  getColisEnCours(): Observable<SuiviColis[]> {
+    return this.http.get<SuiviColis[]>(`${this.apiUrl}/colis-en-cours`);
+  }
+
+  getColisLivres(): Observable<SuiviColis[]> {
+    return this.http.get<SuiviColis[]>(`${this.apiUrl}/colis-livres`);
+  }
 }

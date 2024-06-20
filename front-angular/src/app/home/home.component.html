@@ -4,12 +4,16 @@
   </button>
 
   <span class="spacer"></span>
-
+  <button mat-icon-button routerLink="/home/suivi-colis">
+    <mat-icon>local_shipping</mat-icon>
+  </button>
   <!-- Bouton de filtre -->
 
   <button mat-icon-button (click)="openFilterDialog()">
     <mat-icon>filter_list</mat-icon>
   </button>
+
+
 
   <mat-form-field appearance="outline" class="search-bar">
     <mat-label>Rechercher</mat-label>
@@ -68,13 +72,13 @@
         </button>
       </mat-list-item>
       <mat-list-item>
-        <button mat-button routerLink="/colis-livres" routerLinkActive="active">
-          <mat-icon>check_circle</mat-icon>
-          Colis Livrés
+        <button mat-button routerLink="/home/colis-livres" routerLinkActive="active">
+              <mat-icon>check_circle</mat-icon>
+              Colis Livrés
         </button>
       </mat-list-item>
       <mat-list-item>
-        <button mat-button routerLink="/colis-en-cours" routerLinkActive="active">
+        <button mat-button routerLink="/home/colis-en-cours" routerLinkActive="active">
           <mat-icon>hourglass_top</mat-icon>
           Colis en cours de traitement
         </button>

@@ -51,6 +51,8 @@ import { EmailComposerComponent } from './email-composer/email-composer.componen
 import { CancelDialogComponent } from './cancel-dialog/cancel-dialog.component';
 import { FilterDialogComponent } from './filter-dialog/filter-dialog.component';
 import { FilteredColisComponent } from './filtered-colis/filtered-colis.component';
+import { SuiviColisComponent } from './suivi-colis/suivi-colis.component';
+import { RatingComponent } from './rating/rating.component';
 
 @NgModule({
   declarations: [
@@ -74,7 +76,9 @@ import { FilteredColisComponent } from './filtered-colis/filtered-colis.componen
     EmailComposerComponent,
     CancelDialogComponent,
     FilterDialogComponent,
-    FilteredColisComponent
+    FilteredColisComponent,
+    SuiviColisComponent,
+    RatingComponent
   ],
 
   imports: [
