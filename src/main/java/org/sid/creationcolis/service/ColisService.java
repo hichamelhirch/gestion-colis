@@ -6,6 +6,7 @@ import com.google.zxing.MultiFormatWriter;
 import com.google.zxing.WriterException;
 import com.google.zxing.client.j2se.MatrixToImageWriter;
 import com.google.zxing.common.BitMatrix;
+
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
@@ -24,6 +25,8 @@ import org.sid.creationcolis.enums.TypeLivraison;
 import org.sid.creationcolis.mappers.ColisMapper;
 import org.sid.creationcolis.mappers.ServiceALivraisonMapper;
 import org.sid.creationcolis.mappers.VilleMapper;
+import org.sid.creationcolis.payment.TokenService;
+import org.sid.creationcolis.paymentStripe.StripeService;
 import org.sid.creationcolis.repository.ColisRepository;
 import org.sid.creationcolis.repository.ServiceALivraisonRepository;
 import org.sid.creationcolis.repository.UserRepository;
@@ -52,6 +55,7 @@ import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
+
 @Service
 public class ColisService {
     private static final Logger logger = LoggerFactory.getLogger(ColisService.class);
@@ -74,9 +78,12 @@ public class ColisService {
 
     private final VilleService villeService;
     private final CamundaService camundaService;
+    private final StripeService stripeService;
+    private final TokenService tokenService;
+    private final NotificationService notificationService;
 
     @Autowired
-    public ColisService(RestTemplate restTemplate, ServiceALivraisonRepository serviceALivraisonRepository, ColisRepository colisRepository, ColisMapper colisMapper, UserRepository userRepository, VilleRepository villeRepository, ClientService clientService, ThreadPoolTaskScheduler threadPoolTaskScheduler, BarcodeGenerator barcodeGenerator, VilleMapper villeMapper, ServiceALivraisonRepository serviceRepository, ServiceALivraisonMapper serviceALivraisonMapper, VilleService villeService, CamundaService camundaService) {
+    public ColisService(RestTemplate restTemplate, ServiceALivraisonRepository serviceALivraisonRepository, ColisRepository colisRepository, ColisMapper colisMapper, UserRepository userRepository, VilleRepository villeRepository, ClientService clientService, ThreadPoolTaskScheduler threadPoolTaskScheduler, BarcodeGenerator barcodeGenerator, VilleMapper villeMapper, ServiceALivraisonRepository serviceRepository, ServiceALivraisonMapper serviceALivraisonMapper, VilleService villeService, CamundaService camundaService, StripeService stripeService, TokenService tokenService, NotificationService notificationService) {
         this.restTemplate = restTemplate;
         this.serviceALivraisonRepository = serviceALivraisonRepository;
         this.colisRepository = colisRepository;
@@ -91,27 +98,14 @@ public class ColisService {
         this.serviceALivraisonMapper = serviceALivraisonMapper;
         this.villeService = villeService;
         this.camundaService = camundaService;
+        this.stripeService = stripeService;
+        this.tokenService = tokenService;
+        this.notificationService = notificationService;
     }
 
 
-    public ColisDTO saveColisTest(ColisDTO colisDTO) {
-        Colis colis = colisMapper.toEntity(colisDTO);
-        colis.setFrais(getFraisFromCamunda(colisDTO.getId()));
-        Colis savedColis = colisRepository.save(colis);
-        return colisMapper.toDTO(savedColis);
-    }
 
-    public List<ColisDTO> saveColisDTOList(List<ColisDTO> colisDTOList) {
-        List<Colis> colisList = colisDTOList.stream()
-                .map(colisMapper::toEntity)
-                .collect(Collectors.toList());
 
-        List<Colis> savedColisList = colisRepository.saveAll(colisList);
-
-        return savedColisList.stream()
-                .map(colisMapper::toDTO)
-                .collect(Collectors.toList());
-    }
 
     public List<ColisDTO> getAllColis() {
         logger.debug("Fetching all colis");
@@ -249,7 +243,7 @@ public class ColisService {
         logger.info("Deleted colis with ID: {}", id);
     }
 
-    public Colis createColisFromClient(Client client, String nomDestinataire, String prenomDestinataire,
+   public Colis createColisFromClient(Client client, String nomDestinataire, String prenomDestinataire,
                                        String telDestinataire, String adresseDestinataire, Ville villeDestinataire) {
         Colis colis = new Colis();
         BeanUtils.copyProperties(client, colis);
@@ -259,6 +253,7 @@ public class ColisService {
         colis.setVilleDestinataire(villeDestinataire);
         return colis;
     }
+
 
     public Map<String, Object> prepareDataForCamunda(Long colisId) {
         try {
@@ -321,6 +316,8 @@ public class ColisService {
         }
         return null;
     }
+
+
 
     private byte[] generateBarcode(String text) {
         try {
@@ -455,11 +452,66 @@ public class ColisService {
             throw new IOException("File not found: " + filePath);
         }
     }
+  /*  @Transactional
+    public ColisDTO saveColis(ColisDTO colisDTO) {
+        Colis colis = colisMapper.toEntity(colisDTO);
+        colis.setStatusColis(StatutColis.BROUILLON);
+        colis.setCreationDate(LocalDateTime.now());
+
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String userEmail = authentication.getName();
+        User user = userRepository.findByEmail(userEmail)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        Client client = user.getClient();
+        colis.setClient(client);
+
+        if (colisDTO.getServices() != null && !colisDTO.getServices().isEmpty()) {
+            List<ServiceALivraison> selectedServices = colisDTO.getServices().stream()
+                    .map(serviceALivraisonMapper::toEntity)
+                    .collect(Collectors.toList());
+            colis.setServices(selectedServices);
+        }
+
+        if (colis.getCodeBarre() == null) {
+            colis.setCodeBarre(barcodeGenerator.generateUniqueBarcode());
+        }
+
+
+        Colis savedColis = colisRepository.save(colis);
+
+
+        Integer frais = getFraisFromCamunda(savedColis.getId());
+        if (frais != null) {
+            savedColis.setFrais(frais);
+        } else {
+            throw new RuntimeException("Failed to retrieve frais from Camunda");
+        }
+
+
+        savedColis = colisRepository.save(savedColis);
+
+
+        String successUrl = "http://localhost:9090/payment/success";
+        String cancelUrl = "http://localhost:9090/payment/cancel";
+        try {
+            String paymentLink = stripeService.createCheckoutSession(frais, successUrl, cancelUrl);
+            savedColis.setPaymentLink(paymentLink);
+            savedColis = colisRepository.save(savedColis);
+        } catch (StripeException e) {
+            throw new RuntimeException("Erreur lors de la génération du lien de paiement Stripe", e);
+        }
+
+        return colisMapper.toDTO(savedColis);
+    }
+
+   */
+
     public ColisDTO saveColis(ColisDTO colisDTO) {
         Colis colis = colisMapper.toEntity(colisDTO);
         colis.setStatusColis(colisDTO.getStatusColis());
         colis.setTypeLivraison(colisDTO.getTypeLivraison());
         colis.setCreationDate(LocalDateTime.now());
+        colis.setEstPaye(false);
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String userEmail = authentication.getName();
         User user = userRepository.findByEmail(userEmail)
@@ -479,6 +531,10 @@ public class ColisService {
         if (colis.getCodeBarre() == null) {
             colis.setCodeBarre(barcodeGenerator.generateUniqueBarcode());
         }
+        if (colis.getPaymentToken() == null) {
+            colis.setPaymentToken(tokenService.generatePaymentToken());
+        }
+
         Colis savedColis = colisRepository.save(colis);
         if (savedColis.getNumeroColis() == null) {
             savedColis.setNumeroColis(String.format("Colis/%06d", savedColis.getId()));
@@ -486,8 +542,8 @@ public class ColisService {
         }
         return colisMapper.toDTO(savedColis);
     }
-
     @Transactional(readOnly = true)
+
     public ColisDTO getColisByNumeroColis(String numeroColis) {
         Optional<Colis> colisOptional = colisRepository.findByNumeroColis(numeroColis);
         if (colisOptional.isPresent()) {
@@ -551,7 +607,9 @@ public class ColisService {
                     colis.setDescription(csvRecord.get("description"));
                     colis.setCreationDate(LocalDateTime.now());
                     colis.setStatusColis(StatutColis.BROUILLON);
+                    colis.setEstPaye(false);
                     colis.setClient(client);
+                    colis.setPaymentToken(tokenService.generatePaymentToken());
                     Integer frais = camundaService.getFraisFromCamunda(colis.getTypeLivraison(), colis.getVilleDepart().getId(), colis.getVilleDestinataire().getId());
                     if (frais != null) {
                         colis.setFrais(frais);
@@ -580,9 +638,11 @@ public class ColisService {
             logger.info("Returning response: " + response);
             return response;
         } catch (IOException e) {
+            logger.error("Erreur lors de la lecture du fichier CSV", e);
             throw new RuntimeException("Erreur lors de la lecture du fichier CSV", e);
         }
     }
+
 
     private Ville findByVille(String villeName) {
         Ville ville = villeRepository.findByVille(villeName);
@@ -600,6 +660,7 @@ public class ColisService {
             return null;
         }
     }
+
 
     @Transactional(readOnly = true)
     public ColisDTO getColisByCodeBarre(String codeBarre) {
@@ -717,4 +778,142 @@ public class ColisService {
         return colisMapper.toDTO(colis);
     }
 
+
+    @Transactional
+    public ByteArrayOutputStream generateConfirmationPDF(Long id) throws IOException {
+        ColisDTO colisDTO = getColisById(id);
+        Colis colis = colisMapper.toEntity(colisDTO);
+        return createConfirmationPDF(colis);
+    }
+
+    private ByteArrayOutputStream createConfirmationPDF(Colis colis) throws IOException {
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        PDDocument document = new PDDocument();
+        PDPage page = new PDPage(PDRectangle.A4);
+        document.addPage(page);
+
+        PDPageContentStream contentStream = new PDPageContentStream(document, page);
+
+        // Set background color to white
+        contentStream.setNonStrokingColor(255, 255, 255); // White background
+        contentStream.addRect(0, 0, page.getMediaBox().getWidth(), page.getMediaBox().getHeight());
+        contentStream.fill();
+
+        // Header
+        contentStream.beginText();
+        contentStream.setFont(PDType1Font.HELVETICA_BOLD, 24);
+        contentStream.setNonStrokingColor(0, 0, 0); // Black color
+        contentStream.newLineAtOffset(50, 750);
+        contentStream.showText("Nous vous remercions pour la création de votre colis!");
+        contentStream.endText();
+
+        // Numéro de commande
+        contentStream.beginText();
+        contentStream.setFont(PDType1Font.HELVETICA, 14);
+        contentStream.setNonStrokingColor(0, 0, 0); // Black color
+        contentStream.newLineAtOffset(50, 700);
+        contentStream.showText("Numéro de commande:");
+        contentStream.endText();
+
+        // Payment Token
+        contentStream.beginText();
+        contentStream.setFont(PDType1Font.HELVETICA_BOLD, 20);
+        contentStream.setNonStrokingColor(0, 0, 0); // Black color
+        contentStream.newLineAtOffset(50, 675);
+        contentStream.showText(colis.getPaymentToken());
+        contentStream.endText();
+
+        // Instructions
+        contentStream.beginText();
+        contentStream.setFont(PDType1Font.HELVETICA, 14);
+        contentStream.setNonStrokingColor(0, 0, 0); // Black color
+        contentStream.newLineAtOffset(50, 630);
+        contentStream.showText("Pour payer la création de votre colis, veuillez présenter ce numéro à l'agence CashPlus");
+        contentStream.newLineAtOffset(0, -20);
+        contentStream.showText("la plus proche de chez vous. Une fois le paiement effectué, vous recevrez une confirmation de paiement.");
+        contentStream.endText();
+
+        // Contact Information
+        contentStream.beginText();
+        contentStream.setFont(PDType1Font.HELVETICA_BOLD, 14);
+        contentStream.setNonStrokingColor(0, 0, 0); // Black color
+        contentStream.newLineAtOffset(50, 580);
+        contentStream.showText("Contactez-nous");
+        contentStream.endText();
+
+        contentStream.beginText();
+        contentStream.setFont(PDType1Font.HELVETICA, 12);
+        contentStream.setNonStrokingColor(0, 0, 0); // Black color
+        contentStream.newLineAtOffset(50, 560);
+        contentStream.showText("Nous vous répondrons au plus vite !");
+        contentStream.newLineAtOffset(0, -20);
+        contentStream.showText("Email : contact@tawssil.ma");
+        contentStream.newLineAtOffset(0, -20);
+        contentStream.showText("Téléphone : 06 91 56 49 60");
+        contentStream.newLineAtOffset(0, -20);
+        contentStream.showText("Adresse : 1 rue des Pléiades, Angle Bd Abdelmoumen, Casablanca, Maroc");
+        contentStream.endText();
+
+        contentStream.close();
+        document.save(out);
+        document.close();
+
+        return out;
+    }
+
+
+
+    @Transactional(readOnly = true)
+    public Double getFraisByPaymentToken(String paymentToken) {
+        Optional<Colis> colisOptional = colisRepository.findByPaymentToken(paymentToken);
+        if (colisOptional.isPresent()) {
+            return colisOptional.get().getFrais();
+        } else {
+            throw new RuntimeException("Colis not found with payment token: " + paymentToken);
+        }
+    }
+
+
+
+
+    @Transactional
+    public void updatePaymentStatus(String paymentToken) {
+        Optional<Colis> colisOptional = colisRepository.findByPaymentToken(paymentToken);
+        if (colisOptional.isPresent()) {
+            Colis colis = colisOptional.get();
+            colis.setEstPaye(true);
+            colisRepository.save(colis);
+
+            // Envoyer une notification après la mise à jour du statut de paiement
+            String message = "Paiement effectué avec succès pour le token " + paymentToken;
+            notificationService.createNotification(message);
+        } else {
+            throw new RuntimeException("Colis not found for payment token: " + paymentToken);
+        }
+    }
+    private void sendPaymentNotification(String paymentToken, double frais) {
+        String notificationUrl = "http://localhost:9090/api/colis/payment-notification";
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+
+        Map<String, String> notificationRequest = new HashMap<>();
+        notificationRequest.put("paymentToken", paymentToken);
+        notificationRequest.put("message", "Le paiement pour le token " + paymentToken + " a été effectué avec succès. Le montant est: " + frais + " DH.");
+
+        HttpEntity<Map<String, String>> entity = new HttpEntity<>(notificationRequest, headers);
+
+        try {
+            ResponseEntity<String> response = restTemplate.postForEntity(notificationUrl, entity, String.class);
+            System.out.println("Notification sent: " + response.getBody());
+        } catch (Exception e) {
+            System.err.println("Error sending payment notification: " + e.getMessage());
+        }
+    }
+
+    public List<ColisDTO> getPaidColis() {
+        List<Colis> paidColis = colisRepository.findByEstPaye(true);
+        return paidColis.stream()
+                .map(colisMapper::toDTO)
+                .collect(Collectors.toList());
+    }
 }

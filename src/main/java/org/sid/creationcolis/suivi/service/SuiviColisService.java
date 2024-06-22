@@ -104,6 +104,7 @@ public class SuiviColisService {
 
     // @CachePut(value = "colisCache", key = "#colisId")
     @Transactional
+
     public SuiviColis traiterColis(Long colisId, Long hubId) {
         ColisDTO colisDTO = colisService.getColisById(colisId);
         Colis colis = colisMapper.toEntity(colisDTO);
@@ -115,8 +116,8 @@ public class SuiviColisService {
         Optional<SuiviColis> dernierSuiviOpt = suiviColisRepository.findTopByColisOrderByDateSuiviDesc(colis);
         SuiviColis dernierSuivi = dernierSuiviOpt.orElseThrow(() -> new RuntimeException("Aucun suivi trouvé pour ce colis."));
 
-        if (dernierSuivi.getStatut() != StatutSuiviColis.A_RAMASSER) {
-            throw new RuntimeException("Le colis doit être ramassé avant de pouvoir être traité.");
+        if (dernierSuivi.getStatut() != StatutSuiviColis.A_RAMASSER && dernierSuivi.getStatut() != StatutSuiviColis.EN_COURS_DE_TRAITEMENT) {
+            throw new RuntimeException("Le colis doit être ramassé ou en cours de traitement avant de pouvoir être traité.");
         }
 
         HubDTO hubDTO = hubService.getHubById(hubId);
@@ -226,6 +227,7 @@ public class SuiviColisService {
             suiviColisRepository.delete(sc);
         }
     }
+
     public SuiviColis updateDescriptionProbleme(Long colisId, String description, String type, Long id) {
         ColisDTO colisDTO = colisService.getColisById(colisId);
         Colis colis = colisMapper.toEntity(colisDTO);

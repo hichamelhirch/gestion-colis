@@ -25,6 +25,7 @@ import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/colis")
@@ -47,7 +48,7 @@ public class ColisController {
         return ResponseEntity.ok(savedColis);
     }
 
-    @PostMapping("/import")
+  /*  @PostMapping("/import")
     public ResponseEntity<List<ColisDTO>> importColis(@RequestBody List<ColisDTO> colisDTOList) {
         try {
             List<ColisDTO> savedColisDTOList = colisService.saveColisDTOList(colisDTOList);
@@ -57,10 +58,14 @@ public class ColisController {
         }
     }
 
-    @PostMapping("/stk")
+
+   */
+  /*  @PostMapping("/stk")
     public ColisDTO creatTeste(@RequestBody ColisDTO colisDTO) {
         return colisService.saveColisTest(colisDTO);
     }
+
+   */
 
     @GetMapping
     public ResponseEntity<List<ColisDTO>> getAllColis() {
@@ -94,13 +99,15 @@ public class ColisController {
         return ResponseEntity.noContent().build();
     }
 
-    @PostMapping("/create")
+   /* @PostMapping("/create")
     public ResponseEntity<Colis> createColis(@RequestBody Client client, @RequestParam String nomDestinataire,
                                              @RequestParam String prenomDestinataire, @RequestParam String telDestinataire,
                                              @RequestParam String adresseDestinataire, @RequestParam Ville villeDestinataire) {
         Colis colis = colisService.createColisFromClient(client, nomDestinataire, prenomDestinataire, telDestinataire, adresseDestinataire, villeDestinataire);
         return ResponseEntity.ok(colis);
     }
+
+    */
 
     @GetMapping("/getData/{colisId}")
     public Map<String, Object> prepareDataForCamunda(@PathVariable Long colisId) {
@@ -125,7 +132,7 @@ public class ColisController {
         return ResponseEntity.ok(colisDTO);
     }
 
-  /*  @PostMapping("/importCSV")
+   /*  @PostMapping("/importCSV")
     public ResponseEntity<Map<String, Object>> importCSV(@RequestParam("file") MultipartFile file) {
         try {
             Map<String, Object> response = colisService.createColisEnMasse(file);
@@ -156,6 +163,7 @@ public class ColisController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
         }
     }
+
 
 
 
@@ -229,4 +237,59 @@ public class ColisController {
     public List<ColisDTO> filterColis(@RequestParam List<StatutColis> status) {
         return colisService.filterColis(status);
     }
+    @GetMapping("/download-confirmation/{id}")
+    public ResponseEntity<Resource> downloadConfirmation(@PathVariable Long id) {
+        try {
+            ByteArrayOutputStream pdf = colisService.generateConfirmationPDF(id);
+            ByteArrayResource resource = new ByteArrayResource(pdf.toByteArray());
+
+            HttpHeaders headers = new HttpHeaders();
+            headers.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=confirmation_" + id + ".pdf");
+
+            return ResponseEntity.ok()
+                    .headers(headers)
+                    .contentLength(resource.contentLength())
+                    .contentType(MediaType.APPLICATION_PDF)
+                    .body(resource);
+        } catch (IOException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+    @GetMapping("/getFraisByPaymentToken")
+    public ResponseEntity<Double> getFraisByPaymentToken(@RequestParam String paymentToken) {
+        try {
+            Double frais = colisService.getFraisByPaymentToken(paymentToken);
+            return ResponseEntity.ok(frais);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        }
+    }
+
+
+    @PostMapping("/updatePaymentStatus")
+    public ResponseEntity<Void> updatePaymentStatus(@RequestBody Map<String, String> request) {
+        String paymentToken = request.get("paymentToken");
+        System.out.println("Received paymentToken: " + paymentToken);
+        try {
+            colisService.updatePaymentStatus(paymentToken);
+            System.out.println("Payment status updated for token: " + paymentToken);
+            return ResponseEntity.ok().build();
+        } catch (RuntimeException e) {
+            System.err.println("Error updating payment status for token: " + paymentToken);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+    }
+
+
+    @PostMapping("/payment-notification")
+    public ResponseEntity<String> receivePaymentNotification(@RequestBody Map<String, String> request) {
+        String paymentToken = request.get("paymentToken");
+        String message = request.get("message");
+        // Logique de traitement de la notification
+        System.out.println("Notification de paiement reçue pour le token: " + paymentToken);
+        System.out.println("Message: " + message);
+        return ResponseEntity.ok("Notification reçue pour le token: " + paymentToken);
+    }
+
 }

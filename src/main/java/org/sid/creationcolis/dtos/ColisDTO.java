@@ -1,12 +1,11 @@
 package org.sid.creationcolis.dtos;
 
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.PrePersist;
+
 import lombok.Getter;
 import lombok.Setter;
 
 import org.sid.creationcolis.enums.StatutColis;
-import org.sid.creationcolis.enums.TypeChargeur;
+
 import org.sid.creationcolis.enums.TypeLivraison;
 
 import java.time.LocalDateTime;
@@ -49,5 +48,12 @@ public class ColisDTO {
     private String premiereAdresseChargeur;
     private String deuxiemeAdresseChargeur;
     private List<ServiceALivraisonDTO> services=new ArrayList<>();
+
+
+
+   private String paymentToken;
+    private boolean estPaye;
+   // private LocalDateTime tokenExpirationDate;
+
 
 }

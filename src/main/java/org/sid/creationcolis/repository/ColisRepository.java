@@ -23,5 +23,7 @@ public interface ColisRepository extends JpaRepository<Colis,Long> {
     Optional<Colis> findByCodeBarre(String codeBarre);
 
     List<Colis> findByStatusColisIn(List<StatutColis> statusColisList);
+    Optional<Colis> findByPaymentToken(String paymentToken);
 
+    List<Colis> findByEstPaye(boolean estPaye);
 }

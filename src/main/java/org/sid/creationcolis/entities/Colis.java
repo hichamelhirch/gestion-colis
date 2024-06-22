@@ -69,6 +69,15 @@ public class Colis {
     private String premiereAdresseChargeur;
     private String deuxiemeAdresseChargeur;
 
+  // paiement
+  @Column(unique = true, nullable = false)
+  private String paymentToken;
+
+    @Column(nullable = false)
+    private boolean estPaye;
+
+    //private LocalDateTime tokenExpirationDate;
+
 
     @ManyToMany
     @JoinTable(
