@@ -53,6 +53,7 @@ public class ColisDTO {
 
    private String paymentToken;
     private boolean estPaye;
+    private String groupPaymentToken;
    // private LocalDateTime tokenExpirationDate;
 
 

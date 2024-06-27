@@ -72,6 +72,8 @@ public class Colis {
   // paiement
   @Column(unique = true, nullable = false)
   private String paymentToken;
+    @Column(nullable = true)
+    private String groupPaymentToken;
 
     @Column(nullable = false)
     private boolean estPaye;

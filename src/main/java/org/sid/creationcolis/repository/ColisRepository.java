@@ -26,4 +26,8 @@ public interface ColisRepository extends JpaRepository<Colis,Long> {
     Optional<Colis> findByPaymentToken(String paymentToken);
 
     List<Colis> findByEstPaye(boolean estPaye);
+
+    List<Colis> findByGroupPaymentToken(String groupPaymentToken);
+
+
 }

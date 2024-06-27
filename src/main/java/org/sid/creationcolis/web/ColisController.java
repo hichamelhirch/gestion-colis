@@ -292,4 +292,56 @@ public class ColisController {
         return ResponseEntity.ok("Notification reçue pour le token: " + paymentToken);
     }
 
+    @GetMapping("/totalFrais")
+    public ResponseEntity<Double> getTotalFrais() {
+        Double totalFrais = colisService.getTotalFrais();
+        return ResponseEntity.ok(totalFrais);
+    }
+    @GetMapping("/totalCrbt")
+    public ResponseEntity<Double> getTotalCrbt() {
+        Double totalCrbt = colisService.getTotalCrbt();
+        return ResponseEntity.ok(totalCrbt);
+    }
+
+
+    @GetMapping("/getFraisByGroupPaymentToken")
+    public ResponseEntity<Double> getFraisByGroupPaymentToken(@RequestParam String groupPaymentToken) {
+        try {
+            Double frais = colisService.getFraisByGroupPaymentToken(groupPaymentToken);
+            return ResponseEntity.ok(frais);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        }
+    }
+
+    @PostMapping("/updatePaymentStatusByGroupToken")
+    public ResponseEntity<Void> updatePaymentStatusByGroupToken(@RequestBody Map<String, String> request) {
+        String groupPaymentToken = request.get("groupPaymentToken");
+        try {
+            colisService.updatePaymentStatusByGroupToken(groupPaymentToken);
+            return ResponseEntity.ok().build();
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+    }
+
+    @GetMapping("/download-labels")
+    public ResponseEntity<Resource> downloadGroupConfirmation(@RequestParam String groupPaymentToken) {
+        try {
+            ByteArrayOutputStream pdf = colisService.generateGroupConfirmationPDF(groupPaymentToken);
+            ByteArrayResource resource = new ByteArrayResource(pdf.toByteArray());
+
+            HttpHeaders headers = new HttpHeaders();
+            headers.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=confirmation_" + groupPaymentToken + ".pdf");
+
+            return ResponseEntity.ok()
+                    .headers(headers)
+                    .contentLength(resource.contentLength())
+                    .contentType(MediaType.APPLICATION_PDF)
+                    .body(resource);
+        } catch (IOException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
 }

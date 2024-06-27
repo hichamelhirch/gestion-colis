@@ -553,7 +553,7 @@ public class ColisService {
         }
     }
 
-    @Transactional
+   /* @Transactional
     public Map<String, Object> createColisEnMasse(MultipartFile file) {
         List<Colis> colisList = new ArrayList<>();
         List<String> errorMessages = new ArrayList<>();
@@ -651,6 +651,141 @@ public class ColisService {
             logger.warn(errorMessage);
         }
         return ville;
+    }
+
+    */
+
+
+    @Transactional
+    public Map<String, Object> createColisEnMasse(MultipartFile file) {
+        List<Colis> colisList = new ArrayList<>();
+        List<String> errorMessages = new ArrayList<>();
+        List<String> logMessages = new ArrayList<>();
+        int rejectedCount = 0;
+        String groupPaymentToken = tokenService.generatePaymentToken(); // Générer le token de paiement groupé
+
+        try (BufferedReader fileReader = new BufferedReader(new InputStreamReader(file.getInputStream(), StandardCharsets.UTF_8));
+             CSVParser csvParser = new CSVParser(fileReader, CSVFormat.DEFAULT.withDelimiter(';').withFirstRecordAsHeader().withTrim())) {
+            Iterable<CSVRecord> csvRecords = csvParser.getRecords();
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            String userEmail = authentication.getName();
+            User user = userRepository.findByEmail(userEmail)
+                    .orElseThrow(() -> new RuntimeException("User not found"));
+            Client client = user.getClient();
+
+            for (CSVRecord csvRecord : csvRecords) {
+                Colis colis = new Colis();
+                try {
+                    Ville villeDepart = findByVille(csvRecord.get("villeDepart"));
+                    Ville villeDestinataire = findByVille(csvRecord.get("villeDestinataire"));
+                    if (villeDepart == null) {
+                        String errorMessage = "Ville de départ incorrecte (" + csvRecord.get("villeDepart") + ") pour la ligne " + csvRecord.getRecordNumber();
+                        errorMessages.add("Ville non trouvée: " + csvRecord.get("villeDepart"));
+                        errorMessages.add(errorMessage);
+                        logger.warn(errorMessage);
+                        rejectedCount++;
+                        continue;
+                    }
+                    if (villeDestinataire == null) {
+                        String errorMessage = "Ville de destination incorrecte (" + csvRecord.get("villeDestinataire") + ") pour la ligne " + csvRecord.getRecordNumber();
+                        errorMessages.add("Ville non trouvée: " + csvRecord.get("villeDestinataire"));
+                        errorMessages.add(errorMessage);
+                        logger.warn(errorMessage);
+                        rejectedCount++;
+                        continue;
+                    }
+                    colis.setTypeLivraison(TypeLivraison.valueOf(csvRecord.get("typeLivraison")));
+                    colis.setNomDestinataire(csvRecord.get("nomDestinataire"));
+                    colis.setTelDestinataire(csvRecord.get("telDestinataire"));
+                    colis.setAdresseDestinataire(csvRecord.get("adresseDestinataire"));
+                    colis.setAdresse2Destinataire(csvRecord.get("adresse2Destinataire"));
+                    colis.setVilleDestinataire(villeDestinataire);
+                    colis.setVilleDepart(villeDepart);
+                    colis.setNumTelChargeur(csvRecord.get("numTelChargeur"));
+                    colis.setPremiereAdresseChargeur(csvRecord.get("premiereAdresseChargeur"));
+                    colis.setDeuxiemeAdresseChargeur(csvRecord.get("deuxiemeAdresseChargeur"));
+                    colis.setCashDelivery(parseDouble(csvRecord.get("cashDelivery")));
+                    colis.setValeurColis(parseDouble(csvRecord.get("valeurColis")));
+                    colis.setPoids(parseDouble(csvRecord.get("poids")));
+                    colis.setLongueur(parseDouble(csvRecord.get("longueur")));
+                    colis.setLargeur(parseDouble(csvRecord.get("largeur")));
+                    colis.setHauteur(parseDouble(csvRecord.get("hauteur")));
+                    colis.setDescription(csvRecord.get("description"));
+                    colis.setCreationDate(LocalDateTime.now());
+                    colis.setStatusColis(StatutColis.BROUILLON);
+                    colis.setEstPaye(false);
+                    colis.setClient(client);
+                    colis.setPaymentToken(tokenService.generatePaymentToken());
+                    colis.setGroupPaymentToken(groupPaymentToken);// Assigner le token de paiement groupé
+
+                    Integer frais = camundaService.getFraisFromCamunda(colis.getTypeLivraison(), colis.getVilleDepart().getId(), colis.getVilleDestinataire().getId());
+                    if (frais != null) {
+                        colis.setFrais(frais);
+                    }
+                    colisList.add(colis);
+                } catch (Exception e) {
+                    String errorMessage = "Erreur lors du traitement de la ligne: " + csvRecord.getRecordNumber();
+                    logger.error(errorMessage, e);
+                    errorMessages.add(errorMessage);
+                    rejectedCount++;
+                }
+            }
+
+            List<Colis> savedColisList = colisRepository.saveAll(colisList);
+            for (Colis savedColis : savedColisList) {
+                savedColis.setCodeBarre(barcodeGenerator.generateUniqueBarcode());
+                colisRepository.save(savedColis);
+            }
+
+            String logMessage = "Nombre total de colis à sauvegarder: " + savedColisList.size();
+            logger.info(logMessage);
+            logMessages.add(logMessage);
+            Map<String, Object> response = new HashMap<>();
+            response.put("errorMessages", errorMessages);
+            response.put("logMessages", logMessages);
+            response.put("colisCount", savedColisList.size());
+            response.put("rejectedCount", rejectedCount);
+            response.put("groupPaymentToken", groupPaymentToken);
+            logger.info("Returning response: " + response);
+            return response;
+        } catch (IOException e) {
+            logger.error("Erreur lors de la lecture du fichier CSV", e);
+            throw new RuntimeException("Erreur lors de la lecture du fichier CSV", e);
+        }
+    }
+
+    private Ville findByVille(String villeName) {
+        Ville ville = villeRepository.findByVille(villeName);
+        if (ville == null) {
+            String errorMessage = "Ville non trouvée: " + villeName;
+            logger.warn(errorMessage);
+        }
+        return ville;
+    }
+
+
+    @Transactional(readOnly = true)
+    public Double getFraisByGroupPaymentToken(String groupPaymentToken) {
+        List<Colis> colisList = colisRepository.findByGroupPaymentToken(groupPaymentToken);
+        if (!colisList.isEmpty()) {
+            return colisList.stream().mapToDouble(Colis::getFrais).sum();
+        } else {
+            throw new RuntimeException("No colis found for group payment token: " + groupPaymentToken);
+        }
+    }
+    @Transactional
+    public void updatePaymentStatusByGroupToken(String groupPaymentToken) {
+        List<Colis> colisList = colisRepository.findByGroupPaymentToken(groupPaymentToken);
+        if (!colisList.isEmpty()) {
+            for (Colis colis : colisList) {
+                colis.setEstPaye(true);
+                colisRepository.save(colis);
+            }
+            String message = "Paiement effectué avec succès pour le token groupé " + groupPaymentToken;
+            notificationService.createNotification(message);
+        } else {
+            throw new RuntimeException("No colis found for group payment token: " + groupPaymentToken);
+        }
     }
 
     private Double parseDouble(String value) {
@@ -916,4 +1051,94 @@ public class ColisService {
                 .map(colisMapper::toDTO)
                 .collect(Collectors.toList());
     }
+
+
+    public Double getTotalFrais() {
+        List<Colis> colisList = colisRepository.findAll();
+        return colisList.stream().mapToDouble(Colis::getFrais).sum();
+    }
+
+    public Double getTotalCrbt() {
+        List<Colis> colisList = colisRepository.findAll();
+        return colisList.stream().mapToDouble(Colis::getCashDelivery).sum();
+    }
+
+
+    public ByteArrayOutputStream generateGroupConfirmationPDF(String groupPaymentToken) throws IOException {
+        List<Colis> colisList = colisRepository.findByGroupPaymentToken(groupPaymentToken);
+
+        if (colisList.isEmpty()) {
+            throw new RuntimeException("No colis found for group payment token: " + groupPaymentToken);
+        }
+
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        PDDocument document = new PDDocument();
+        PDPage page = new PDPage(PDRectangle.A4);
+        document.addPage(page);
+
+        PDPageContentStream contentStream = new PDPageContentStream(document, page);
+
+        contentStream.setNonStrokingColor(255, 255, 255); // White background
+        contentStream.addRect(0, 0, page.getMediaBox().getWidth(), page.getMediaBox().getHeight());
+        contentStream.fill();
+
+        contentStream.beginText();
+        contentStream.setFont(PDType1Font.HELVETICA_BOLD, 24);
+        contentStream.setNonStrokingColor(0, 0, 0); // Black color
+        contentStream.newLineAtOffset(50, 750);
+        contentStream.showText("Nous vous remercions pour la création de vos colis!");
+        contentStream.endText();
+
+        contentStream.beginText();
+        contentStream.setFont(PDType1Font.HELVETICA, 14);
+        contentStream.setNonStrokingColor(0, 0, 0); // Black color
+        contentStream.newLineAtOffset(50, 700);
+        contentStream.showText("Numéro de votre commande:");
+        contentStream.endText();
+
+        contentStream.beginText();
+        contentStream.setFont(PDType1Font.HELVETICA_BOLD, 20);
+        contentStream.setNonStrokingColor(0, 0, 0); // Black color
+        contentStream.newLineAtOffset(50, 675);
+        contentStream.showText(groupPaymentToken);
+        contentStream.endText();
+
+        contentStream.beginText();
+        contentStream.setFont(PDType1Font.HELVETICA, 14);
+        contentStream.setNonStrokingColor(0, 0, 0); // Black color
+        contentStream.newLineAtOffset(50, 630);
+        contentStream.showText("Pour payer la création de vos colis, veuillez présenter ce numéro à l'agence CashPlus");
+        contentStream.newLineAtOffset(0, -20);
+        contentStream.showText("la plus proche de chez vous. Une fois le paiement effectué, vous recevrez une confirmation de paiement.");
+        contentStream.endText();
+
+        contentStream.beginText();
+        contentStream.setFont(PDType1Font.HELVETICA_BOLD, 14);
+        contentStream.setNonStrokingColor(0, 0, 0); // Black color
+        contentStream.newLineAtOffset(50, 580);
+        contentStream.showText("Contactez-nous");
+        contentStream.endText();
+
+        contentStream.beginText();
+        contentStream.setFont(PDType1Font.HELVETICA, 12);
+        contentStream.setNonStrokingColor(0, 0, 0); // Black color
+        contentStream.newLineAtOffset(50, 560);
+        contentStream.showText("Nous vous répondrons au plus vite !");
+        contentStream.newLineAtOffset(0, -20);
+        contentStream.showText("Email : contact@tawssil.ma");
+        contentStream.newLineAtOffset(0, -20);
+        contentStream.showText("Téléphone : 06 91 56 49 60");
+        contentStream.newLineAtOffset(0, -20);
+        contentStream.showText("Adresse : 1 rue des Pléiades, Angle Bd Abdelmoumen, Casablanca, Maroc");
+        contentStream.endText();
+
+        contentStream.close();
+        document.save(out);
+        document.close();
+
+        return out;
+    }
+
+
+
 }
